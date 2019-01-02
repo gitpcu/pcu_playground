@@ -17,9 +17,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "outDir": "scr/lib",
+    "removeComments": true,
+    "noImplicitAny": true,
   },
   "include": [
-    "src"
+    "src/**/*"
   ]
 }
