@@ -1,21 +1,21 @@
-export class LinkedList<T> {
-    private _first: Node<T> | undefined;
-    private _last: Node<T> | undefined;
+export class LinkedListTest<T> {
+    private _first: Node<T>;
+    private _last: Node<T>;
     private _size: number;
 
     constructor(...datas: T[]) {
         if(!datas) {
             this._first = undefined;
             this._last = undefined;
+        } else {
+            datas.map((data, index) => {
+                this.addLast(data);
+            });
         }
-
-        datas.map((data, index) => {
-            this.addLast(data);
-        });
         this._size = 0;
     }
 
-    get: ((index: number) => Node<T> | undefined) = (index) => {
+    get: ((index: number) => Node<T>) = (index) => {
         if(this._first && this._size >= index) {
             let temp;
             while(index-- != 0) {
@@ -59,11 +59,9 @@ export class LinkedList<T> {
         } else {
             const newNode = new Node(data);
             const temp1 = this.get(index-1);
-            if(temp1) {
-                const temp2 = temp1.next;
-                temp1.next = newNode;
-                newNode.next = temp2;
-            }
+            const temp2 = temp1.next;
+            temp1.next = newNode;
+            newNode.next = temp2;
 
             if(!newNode.next) {
                 this._last = newNode;
@@ -72,34 +70,26 @@ export class LinkedList<T> {
             this._size++;
         }
     }
-    removeFirst: (() => T | undefined | undefined) = () => {
+    removeFirst: (() => T) = () => {
         let removedNode = this._first;
-        let removedData;
-        if(removedNode) {
-            removedData = removedNode.data;
-            this._first = removedNode.next;
-        }
+        const removedData = removedNode.data;
+        this._first = removedNode.next;
         this._size--;
         removedNode = undefined;
 
         return removedData;
     }
-    removeLast: (() => T | undefined) = () => {
+    removeLast: (() => T) = () => {
         return this.remove(this._size-1);
     }
-    remove: ((index: number) => T | undefined) = (index) => {
+    remove: ((index: number) => T) = (index) => {
         if(index == 0) {
             return this.removeFirst();
         }
 
-        let temp1 = this.get(index-1);
-        let temp2;
-        let removedNode;
-        
-        if(temp1 != undefined) {
-            let removedNode = temp1.next;
-            temp2 = temp1 && temp1.next.next;
-        }
+        const temp1 = this.get(index-1);
+        let removedNode = temp1.next;
+        const temp2 = temp1.next.next;
         const removedData = removedNode.data;
 
         temp1.next = temp2;
@@ -150,7 +140,7 @@ export class LinkedList<T> {
 
 class Node<T> {
     private _data: T;
-    private _next: Node<T> | undefined;
+    private _next: Node<T>;
 
     constructor(data: T) {
         this._data = data;
@@ -165,7 +155,7 @@ class Node<T> {
     set data(data: T) {
         this._data = data;
     }
-    set next(next: Node<T> | undefined) {
+    set next(next: Node<T>) {
         this._next = next;
     }
     public toString() {
@@ -175,13 +165,13 @@ class Node<T> {
 
 class ListIterator<T> {
     private _currentData: T;
-    private _next: Node<T> | undefined;
+    private _next: Node<T>;
 
-    constructor(first: Node<T> | undefined) {
+    constructor(first: Node<T>) {
         this._next = first;
     }
 
-    next: (() => T | undefined) = () => {
+    next: (() => T) = () => {
         const currentNode = this._next;
         this._currentData = currentNode.data;
         this._next = currentNode.next;
