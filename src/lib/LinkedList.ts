@@ -1,4 +1,4 @@
-export class LinkedList<T> {
+export default class LinkedList<T> {
     private _first: Node<T>;
     private _last: Node<T>;
     private _size: number;
@@ -153,19 +153,19 @@ export class LinkedList<T> {
     private error: ((type: string) => any) = (type) => {
         switch(type) {
             case 'remove':
-                console.error("Check please! maybe list size=0");
+                console.error("Error! LinkedList.remove(): maybe list size=0");
                 break;
             case 'add':
-                console.error("Check please! maybe input index bigger than list size.")
+                console.error("Error! LinkedList.add(): maybe input index bigger than list size.")
                 break;
             case 'get':
-                console.error("Check please! 1.maybe list size=0  2.input smaller than size.");
+                console.error("Error! LinkedList.get(): 1.maybe list size=0  2.input smaller than size.");
                 break;
         }
     }
 }
 
-class Node<T> {
+export class Node<T> {
     private _data: T;
     private _next: Node<T>;
 
@@ -229,7 +229,7 @@ class ListIterator<T> {
     private error: ((type: string) => any) = (type) => {
         switch(type) {
             case 'next':
-                console.error("Check please! Next node does not exist.");
+                console.error("Error! ListIterator.next(): next node does not exist.");
                 break;
         }
     }
