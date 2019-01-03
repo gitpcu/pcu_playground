@@ -150,10 +150,6 @@ export class LinkedList<T> {
         result += "]";
         return result;
     }
-    set size(type: any) {
-        type === "+" && this._size++;
-        type === "-" && this._size--;
-    }
     private error: ((type: string) => any) = (type) => {
         switch(type) {
             case 'remove':
