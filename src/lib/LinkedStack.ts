@@ -1,6 +1,6 @@
 import { Node } from "./LinkedList";
 
-export default class Stack<T> {
+export default class LinkedStack<T> {
     private _size: number;
     private _top: Node<T>;
 

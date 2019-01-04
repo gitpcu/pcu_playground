@@ -1,6 +1,6 @@
 import { Node } from "./LinkedList";
 
-export default class Queue<T> {
+export default class LinkedQueue<T> {
     private _size: number;
     private _first: Node<T>;
     private _last: Node<T>;

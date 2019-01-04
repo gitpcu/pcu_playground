@@ -1,4 +1,4 @@
-export default class LinkedList<T> {
+export default class DoubleLinkedList<T> {
     private _first: Node<T>;
     private _last: Node<T>;
     private _size: number;
@@ -11,11 +11,21 @@ export default class LinkedList<T> {
     }
 
     get: ((index: number) => Node<T>) = (index) => {
-    let temp = this._first;
+        let forward;  // true: forward,  false: backward
+        let temp;
+        
+        if(index >= this._size / 2) {
+            forward = false;
+            temp = this._last;
+        } else {
+            forward = true;
+            temp = this._first;
+        }
 
-        if(this._first && this._size > index && index >= 0) {
-            while(index-- != 0) {
-                temp = temp.next;
+        if(this._size > 0 && this._size > index && index >= 0) {
+            let count = forward ? index : this._size - index - 1;
+            while(count-- != 0) {
+                temp = forward ? temp.next : temp.prev;
             }
         } else {
             this.error('get');
@@ -29,6 +39,7 @@ export default class LinkedList<T> {
 
         if(this._first) {
             newNode.next = this._first;
+            this._first.prev = newNode;
             this._first = newNode;
         } else {
             this._first = newNode;
@@ -42,6 +53,7 @@ export default class LinkedList<T> {
 
         if(this._last) {
             this._last.next = newNode;
+            newNode.prev = this._last;
             this._last = newNode;
         } else {
             this._first = newNode;
@@ -51,20 +63,19 @@ export default class LinkedList<T> {
         this._size++;
     }
     add: ((index: number, data: T) => void) = (index, data) => {
-        if(index > this._size-1 || index < 0) {
-            this.error('add');
-            return;
-        }
-
         if(index == 0 || !this._first) {
             this.addFirst(data);
+        } else if(index == this._size-1) {
+            this.addLast(data);
         } else {
             const newNode = new Node(data);
             const temp1 = this.get(index-1);
             const temp2 = temp1.next;
-
+            
             temp1.next = newNode;
+            newNode.prev = temp1;
             newNode.next = temp2;
+            temp2.prev = newNode;
             if(!newNode.next) {
                 this._last = newNode;
             }
@@ -79,8 +90,11 @@ export default class LinkedList<T> {
         }
 
         let removedNode = this._first;
-        const removedData = removedNode.data;
+        const removedData = removedNode.clone();
+        console.log('리무브 클론 데이터: ' + removedData);
+        // const removedData = removedNode.data;
         this._first = removedNode.next;
+        this._first.prev = null;
         this._size--;
         removedNode = null;
 
@@ -92,7 +106,15 @@ export default class LinkedList<T> {
             return;
         }
 
-        return this.remove(this._size-1);
+        let removedNode = this._last;
+        const removedData = removedNode.data;
+
+        this._last = removedNode.prev;
+        this._last.next = null;
+        this._size--;
+        removedNode = null;
+
+        return removedData;
     }
     remove: ((index: number) => T) = (index) => {
         if(this._size == 0 || index < 0 || index > this._size-1) {
@@ -107,29 +129,23 @@ export default class LinkedList<T> {
 
         if(index == 0) {
             return this.removeFirst();
+        } else if(index == this._size-1) {
+            return this.removeLast();
         }
 
-        const temp1 = this.get(index-1);
-        let removedNode = temp1.next;
-        const temp2 = temp1.next.next;
+        let removedNode = this.get(index);
+        const temp1 = removedNode.prev;
+        const temp2 = removedNode.next;
         const removedData = removedNode.data;
 
         temp1.next = temp2;
+        temp2.prev = temp1;
         removedNode = null;
-
-        if(index == this._size-1) {
-            this._last = temp1;
-        }
-        
         this._size--;
 
         return removedData;
     }
-    indexOf: ((data: T) => number) = (data) => {
-        if(this._size == 0) {
-            return -1;
-        }
-
+    indexOf(data: T): number {
         let currentNode = this._first;
         let index = 0;
 
@@ -144,8 +160,26 @@ export default class LinkedList<T> {
 
         return index;
     }
+    lastIndexOf(data: T): number {
+        let currentNode = this._first;
+        let index = this._size-1;
+
+        while(currentNode.data != data) {
+            currentNode = currentNode.prev;
+            index--;
+            
+            if(!currentNode) {
+                return -1;
+            }
+        }
+
+        return index;
+    }
+    size(): number {
+        return this._size;
+    }
     getIterator: (() => ListIterator<T>) = () => {
-        return new ListIterator(this, this._first);
+        return new ListIterator(this, this._first, this._last);
     }
     toString: (() => string) = () => {
         let currentNode = this._first;
@@ -181,6 +215,7 @@ export default class LinkedList<T> {
 export class Node<T> {
     private _data: T;
     private _next: Node<T>;
+    private _prev: Node<T>;
 
     constructor(data: T) {
         this._data = data;
@@ -192,11 +227,17 @@ export class Node<T> {
     get next() {
         return this._next;
     }
+    get prev() {
+        return this._prev;
+    }
     set data(data: T) {
         this._data = data;
     }
     set next(next: Node<T>) {
         this._next = next;
+    }
+    set prev(prev: Node<T>) {
+        this._prev = prev;
     }
     public toString() {
         return this._data.toString();
@@ -209,46 +250,76 @@ export class Node<T> {
 }
 
 class ListIterator<T> {
-    private _next: Node<T>;
+    private _currentNode: Node<T>;
     private _lastData: T;
     private _lastIndex: number;
-    private _currentList: LinkedList<T>;
+    private _lastNode: Node<T>;
+    private _currentList: DoubleLinkedList<T>;
+    private _size: number;
 
-    constructor(list: LinkedList<T>, first: Node<T>) {
+    constructor(list: DoubleLinkedList<T>, first: Node<T>, last: Node<T>) {
         this._currentList = list;
-        this._next = first;
-        this._lastIndex = -1;
+        this._currentNode = first;
+        this._lastNode = last;
+        this._lastIndex = 0;
+        this._size = list.size();
     }
 
-    next: (() => T) = () => {
-        if(!this._next) {
+    next(): T {
+        if(!this._currentNode) {
             this.error('next');
             return;
         }
 
-        this._lastData = this._next.data;
-        this._next = this._next.next;
-        this._lastIndex++;
+        this._lastData = this._currentNode.data;    
+        this._currentNode = this._currentNode.next; 
+        this._lastIndex++;                          
+
+        return this._lastData;                   
+    }
+    prev(): T {
+        if(this._lastIndex == 0) {
+            this.error('prev');
+            return;
+        }
+        
+        if(this._lastIndex == this._size) {
+            this._currentNode = this._lastNode; 
+        } else {
+            this._currentNode = this._currentNode.prev; 
+        }
+        this._lastData = this._currentNode.data;    
+        this._lastIndex--;    
 
         return this._lastData;
     }
-    hasNext: (() => boolean) = () => {
-        if(this._next) return true;
+    hasNext(): boolean {
+        if(this._currentNode) return true;     
         else return false;
     }
-    add: ((data: T) => void) = (data) => {
-        this._currentList.add(this._lastIndex, data);
+    hasPrev(): boolean {
+        if(this._lastIndex > 0) return true;
+        else return false;
+    }
+    add(data: T): void {
+        this._currentList.add(this._lastIndex-1, data);
         this._lastIndex++;
+        this._size++;
     }
-    remove: (() => void) = () => {
-        this._currentList.remove(this._lastIndex);
+    remove(): void {
+        this._currentList.remove(this._lastIndex-1);
         this._lastIndex--;
+        this._size--;
     }
-    private error: ((type: string) => any) = (type) => {
+    private error(type: string): any {
         switch(type) {
             case 'next':
                 console.error("Error! ListIterator.next(): \n\t\t next node does not exist.");
                 break;
+            case 'prev':
+            ///////////////////////////////// 요고요고 고치샘!
+            console.error("Error! ListIterator.prev(): \n\t\t next node does not exist.");
+            break;
         }
     }
 }
