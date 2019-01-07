@@ -247,7 +247,7 @@ class ListIterator<T> {
     private error: ((type: string) => any) = (type) => {
         switch(type) {
             case 'next':
-                console.error("Error! ListIterator.next(): \n\t\t next node does not exist.");
+                console.error("Error! ListIterator.next(): \n\t\t 1.maybe list size=0 \n\t\t 2.next node does not exist anymore.");
                 break;
         }
     }

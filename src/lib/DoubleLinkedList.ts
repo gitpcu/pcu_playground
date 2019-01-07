@@ -65,7 +65,7 @@ export default class DoubleLinkedList<T> {
     add: ((index: number, data: T) => void) = (index, data) => {
         if(index == 0 || !this._first) {
             this.addFirst(data);
-        } else if(index == this._size-1) {
+        } else if(index == this._size) {
             this.addLast(data);
         } else {
             const newNode = new Node(data);
@@ -91,7 +91,7 @@ export default class DoubleLinkedList<T> {
 
         let removedNode = this._first;
         const removedData = removedNode.clone();
-        console.log('리무브 클론 데이터: ' + removedData);
+        //console.log('리무브 클론 데이터: ' + removedData);
         // const removedData = removedNode.data;
         this._first = removedNode.next;
         this._first.prev = null;
@@ -255,13 +255,14 @@ class ListIterator<T> {
     private _lastIndex: number;
     private _lastNode: Node<T>;
     private _currentList: DoubleLinkedList<T>;
+    private _direction: string;
     private _size: number;
 
     constructor(list: DoubleLinkedList<T>, first: Node<T>, last: Node<T>) {
         this._currentList = list;
         this._currentNode = first;
         this._lastNode = last;
-        this._lastIndex = 0;
+        this._lastIndex = -1;
         this._size = list.size();
     }
 
@@ -273,52 +274,64 @@ class ListIterator<T> {
 
         this._lastData = this._currentNode.data;    
         this._currentNode = this._currentNode.next; 
-        this._lastIndex++;                          
+        this._lastIndex++;         
+        this._direction = 'next';                 
 
         return this._lastData;                   
     }
     prev(): T {
-        if(this._lastIndex == 0) {
+        if(this._lastIndex < 0) {
             this.error('prev');
             return;
         }
-        
-        if(this._lastIndex == this._size) {
-            this._currentNode = this._lastNode; 
+        if(this._lastIndex+1 == this._size) {
+            this._currentNode = this._lastNode;
         } else {
             this._currentNode = this._currentNode.prev; 
         }
-        this._lastData = this._currentNode.data;    
-        this._lastIndex--;    
+        this._lastData = this._currentNode.data;
+        this._lastIndex--;
+        this._direction = 'prev';
+        console.log(this._lastIndex);
 
         return this._lastData;
     }
     hasNext(): boolean {
-        if(this._currentNode) return true;     
+        if(this._currentNode) return true;
         else return false;
     }
     hasPrev(): boolean {
-        if(this._lastIndex > 0) return true;
+        console.log(`프레브 ${this._lastIndex}`)
+        if(this._lastIndex >= 0) return true;
         else return false;
     }
     add(data: T): void {
-        this._currentList.add(this._lastIndex-1, data);
-        this._lastIndex++;
+        const addIndex = this._direction === 'next' ? this._lastIndex : this._lastIndex+1;
+        this._currentList.add(addIndex, data);
         this._size++;
+        if(this._direction === 'next') {
+            this._lastIndex++;
+        } else {
+            this._currentNode = this._currentNode.prev;
+        }
     }
     remove(): void {
-        this._currentList.remove(this._lastIndex-1);
-        this._lastIndex--;
+        const removeIndex = this._direction === 'next' ? this._lastIndex : this._lastIndex+1;
+        this._currentList.remove(removeIndex);
         this._size--;
-    }
+        if(this._direction === 'next') {
+            this._lastIndex--;
+        } else {
+            //this._lastIndex++;
+        }
+   } 
     private error(type: string): any {
         switch(type) {
             case 'next':
-                console.error("Error! ListIterator.next(): \n\t\t next node does not exist.");
+            console.error("Error! ListIterator.next(): \n\t\t 1.maybe list size=0 \n\t\t 2.next node does not exist anymore.");
                 break;
             case 'prev':
-            ///////////////////////////////// 요고요고 고치샘!
-            console.error("Error! ListIterator.prev(): \n\t\t next node does not exist.");
+            console.error("Error! ListIterator.prev(): \n\t\t 1.maybe list size=0 \n\t\t 2.prev node does not exist anymore.");
             break;
         }
     }
