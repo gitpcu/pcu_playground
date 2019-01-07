@@ -321,8 +321,6 @@ class ListIterator<T> {
         this._size--;
         if(this._direction === 'next') {
             this._lastIndex--;
-        } else {
-            //this._lastIndex++;
         }
    } 
     private error(type: string): any {
