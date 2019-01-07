@@ -6,10 +6,10 @@ import {linkedListTest, linkedStackTest, linkedQueueTest, doubleLinkedListTest} 
 
 class App extends Component {
   render() {
-     //linkedListTest();
-    // linkedStackTest();
-    // linkedQueueTest();
-    doubleLinkedListTest();
+    //linkedListTest();
+    linkedStackTest();
+    //linkedQueueTest();
+    //doubleLinkedListTest();
 
     return (
       <div className="App">

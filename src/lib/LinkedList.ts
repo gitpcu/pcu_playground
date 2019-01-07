@@ -1,4 +1,6 @@
-export default class LinkedList<T> {
+import { Iterable, Iterator } from './Iterator';
+
+export default class LinkedList<T> implements Iterable<T> {
     private _first: Node<T>;
     private _last: Node<T>;
     private _size: number;
@@ -10,7 +12,7 @@ export default class LinkedList<T> {
         });
     }
 
-    get: ((index: number) => Node<T>) = (index) => {
+    get(index: number): Node<T> {
     let temp = this._first;
 
         if(this._first && this._size > index && index >= 0) {
@@ -24,7 +26,7 @@ export default class LinkedList<T> {
 
         return temp;
     }
-    addFirst: ((data: T) => void) = (data) => {
+    addFirst(data: T): void {
         const newNode = new Node(data);
 
         if(this._first) {
@@ -37,7 +39,7 @@ export default class LinkedList<T> {
 
         this._size++;
     }
-    addLast: ((data: T) => void) = (data) => {
+    addLast(data: T): void {
         const newNode = new Node(data);
 
         if(this._last) {
@@ -50,7 +52,7 @@ export default class LinkedList<T> {
 
         this._size++;
     }
-    add: ((index: number, data: T) => void) = (index, data) => {
+    add(index: number, data: T): void {
         if(index > this._size-1 || index < 0) {
             this.error('add');
             return;
@@ -72,7 +74,7 @@ export default class LinkedList<T> {
             this._size++;
         }
     }
-    removeFirst: (() => T) = () => {
+    removeFirst(): T {
         if(this._size == 0) {
             this.error('remove');
             return;
@@ -86,7 +88,7 @@ export default class LinkedList<T> {
 
         return removedData;
     }
-    removeLast: (() => T) = () => {
+    removeLast(): T {
         if(this._size == 0) {
             this.error('remove');
             return;
@@ -94,7 +96,7 @@ export default class LinkedList<T> {
 
         return this.remove(this._size-1);
     }
-    remove: ((index: number) => T) = (index) => {
+    remove(index: number): T {
         if(this._size == 0 || index < 0 || index > this._size-1) {
             this.error('remove');
             return;
@@ -125,7 +127,7 @@ export default class LinkedList<T> {
 
         return removedData;
     }
-    indexOf: ((data: T) => number) = (data) => {
+    indexOf(data: T): number {
         if(this._size == 0) {
             return -1;
         }
@@ -144,10 +146,10 @@ export default class LinkedList<T> {
 
         return index;
     }
-    getIterator: (() => ListIterator<T>) = () => {
+    getIterator(): ListIterator<T> {
         return new ListIterator(this, this._first);
     }
-    toString: (() => string) = () => {
+    toString(): string {
         let currentNode = this._first;
         let index = 0;
         let result = "[";
@@ -163,7 +165,7 @@ export default class LinkedList<T> {
         result += "]";
         return result;
     }
-    private error: ((type: string) => any) = (type) => {
+    private error(type: string): any {
         switch(type) {
             case 'remove':
                 console.error("Error! LinkedList.remove(): \n\t maybe list size=0");
@@ -208,7 +210,7 @@ export class Node<T> {
     }
 }
 
-class ListIterator<T> {
+class ListIterator<T> implements Iterator<T> {
     private _next: Node<T>;
     private _lastData: T;
     private _lastIndex: number;
@@ -220,7 +222,7 @@ class ListIterator<T> {
         this._lastIndex = -1;
     }
 
-    next: (() => T) = () => {
+    next(): T {
         if(!this._next) {
             this.error('next');
             return;
@@ -232,19 +234,19 @@ class ListIterator<T> {
 
         return this._lastData;
     }
-    hasNext: (() => boolean) = () => {
+    hasNext(): boolean {
         if(this._next) return true;
         else return false;
     }
-    add: ((data: T) => void) = (data) => {
+    add(data: T): void {
         this._currentList.add(this._lastIndex, data);
         this._lastIndex++;
     }
-    remove: (() => void) = () => {
+    remove(): void {
         this._currentList.remove(this._lastIndex);
         this._lastIndex--;
     }
-    private error: ((type: string) => any) = (type) => {
+    private error(type: string): any {
         switch(type) {
             case 'next':
                 console.error("Error! ListIterator.next(): \n\t\t 1.maybe list size=0 \n\t\t 2.next node does not exist anymore.");

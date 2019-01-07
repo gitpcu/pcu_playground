@@ -1,6 +1,7 @@
 import { Node } from "./LinkedList";
+import { Iterable, Iterator } from './Iterator';
 
-export default class LinkedQueue<T> {
+export default class LinkedQueue<T> implements Iterable<T> {
     private _size: number;
     private _first: Node<T>;
     private _last: Node<T>;
@@ -26,7 +27,7 @@ export default class LinkedQueue<T> {
     dequeue: (() => T) = () => {
         if(!this._first) {
             this.error('dequeue');
-            return;    
+            return;
         }
 
         let removeNode = this._first;
@@ -34,8 +35,12 @@ export default class LinkedQueue<T> {
         const removedData = this._first.data;
         
         this._first = newFirst;
-        removeNode = undefined;
+        removeNode = null;
         this._size--;
+
+        if(this._size == 0) {
+            this._last = null;
+        }
 
         return removedData;
     }
@@ -53,6 +58,9 @@ export default class LinkedQueue<T> {
 
         return true;
     }
+    getIterator() {
+        return new QueueIterator(this._first);
+    }
     private error: ((type: string) => any) = (type) => {
         switch(type) {
             case 'dequeue':
@@ -60,6 +68,43 @@ export default class LinkedQueue<T> {
                 break;
             case 'peek':
                 console.error("Error! Queue.peek(): maybe Queue is empty.")
+                break;
+        }
+    }
+}
+
+class QueueIterator<T> implements Iterator<T> {
+    private _currentNode: Node<T>;
+    private _lastData: T;
+    private _lastIndex: number;
+
+    constructor(first: Node<T>) {
+        this._currentNode = first;
+        this._lastIndex = -1;
+    }
+
+    next() {
+        if(!this._currentNode) {
+            this.error('next');
+            return;
+        }
+
+        this._lastData = this._currentNode.data;
+        this._lastIndex++;
+        this._currentNode = this._currentNode.next;
+
+        return this._lastData;
+    }
+    hasNext() {
+        if(this._currentNode) {
+            return true;
+        }
+        return false;
+    }
+    private error(type: string): any {
+        switch(type) {
+            case 'next':
+                console.error("Error! QueueIterator.next(): \n\t\t 1.maybe Queue size=0 \n\t\t 2.next Queue does not exist anymore.");
                 break;
         }
     }
