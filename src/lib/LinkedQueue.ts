@@ -10,7 +10,7 @@ export default class LinkedQueue<T> implements Iterable<T> {
         this._size = 0;
     }
 
-    enqueue: ((data: T) => T) = (data) => {
+    enqueue(data: T): T {
         const newNode = new Node(data);
 
         if(this._size == 0) {
@@ -24,7 +24,7 @@ export default class LinkedQueue<T> implements Iterable<T> {
 
         return newNode.data;
     }
-    dequeue: (() => T) = () => {
+    dequeue(): T {
         if(!this._first) {
             this.error('dequeue');
             return;
@@ -44,7 +44,7 @@ export default class LinkedQueue<T> implements Iterable<T> {
 
         return removedData;
     }
-    peek: (() => T) = () => {
+    peek(): T {
         if(!this._first) {
             this.error('peek');
             return;
@@ -52,16 +52,16 @@ export default class LinkedQueue<T> implements Iterable<T> {
 
         return this._first.data;
     }
-    empty: (() => boolean) = () => {
+    empty(): boolean {
         if(this._first)
             return false;
 
         return true;
     }
-    getIterator() {
+    getIterator(): Iterator<T> {
         return new QueueIterator(this._first);
     }
-    private error: ((type: string) => any) = (type) => {
+    private error(type: string): any {
         switch(type) {
             case 'dequeue':
                 console.error("Error! Queue.dequeue(): maybe Queue is empty.");
@@ -83,7 +83,7 @@ class QueueIterator<T> implements Iterator<T> {
         this._lastIndex = -1;
     }
 
-    next() {
+    next(): T {
         if(!this._currentNode) {
             this.error('next');
             return;
@@ -95,7 +95,7 @@ class QueueIterator<T> implements Iterator<T> {
 
         return this._lastData;
     }
-    hasNext() {
+    hasNext(): boolean {
         if(this._currentNode) {
             return true;
         }

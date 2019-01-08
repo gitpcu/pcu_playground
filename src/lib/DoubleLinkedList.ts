@@ -1,4 +1,6 @@
-export default class DoubleLinkedList<T> {
+import { Iterable, Iterator } from './Iterator';
+
+export default class DoubleLinkedList<T> implements Iterable<T> {
     private _first: Node<T>;
     private _last: Node<T>;
     private _size: number;
@@ -10,7 +12,7 @@ export default class DoubleLinkedList<T> {
         });
     }
 
-    get: ((index: number) => Node<T>) = (index) => {
+    get(index: number): Node<T> {
         let forward;  // true: forward,  false: backward
         let temp;
         
@@ -34,7 +36,7 @@ export default class DoubleLinkedList<T> {
 
         return temp;
     }
-    addFirst: ((data: T) => void) = (data) => {
+    addFirst(data: T): void {
         const newNode = new Node(data);
 
         if(this._first) {
@@ -48,7 +50,7 @@ export default class DoubleLinkedList<T> {
 
         this._size++;
     }
-    addLast: ((data: T) => void) = (data) => {
+    addLast(data: T): void {
         const newNode = new Node(data);
 
         if(this._last) {
@@ -62,7 +64,7 @@ export default class DoubleLinkedList<T> {
 
         this._size++;
     }
-    add: ((index: number, data: T) => void) = (index, data) => {
+    add(index: number, data: T): void {
         if(index == 0 || !this._first) {
             this.addFirst(data);
         } else if(index == this._size) {
@@ -83,16 +85,15 @@ export default class DoubleLinkedList<T> {
             this._size++;
         }
     }
-    removeFirst: (() => T) = () => {
+    removeFirst(): T {
         if(this._size == 0) {
             this.error('remove');
             return;
         }
 
         let removedNode = this._first;
-        const removedData = removedNode.clone();
-        //console.log('리무브 클론 데이터: ' + removedData);
-        // const removedData = removedNode.data;
+        const removedData = removedNode.data;
+
         this._first = removedNode.next;
         this._first.prev = null;
         this._size--;
@@ -100,7 +101,7 @@ export default class DoubleLinkedList<T> {
 
         return removedData;
     }
-    removeLast: (() => T) = () => {
+    removeLast(): T {
         if(this._size == 0) {
             this.error('remove');
             return;
@@ -116,7 +117,7 @@ export default class DoubleLinkedList<T> {
 
         return removedData;
     }
-    remove: ((index: number) => T) = (index) => {
+    remove(index: number): T {
         if(this._size == 0 || index < 0 || index > this._size-1) {
             this.error('remove');
             return;
@@ -178,10 +179,10 @@ export default class DoubleLinkedList<T> {
     size(): number {
         return this._size;
     }
-    getIterator: (() => ListIterator<T>) = () => {
+    getIterator(): Iterator<T> {
         return new ListIterator(this, this._first, this._last);
     }
-    toString: (() => string) = () => {
+    toString(): string {
         let currentNode = this._first;
         let index = 0;
         let result = "[";
@@ -197,7 +198,7 @@ export default class DoubleLinkedList<T> {
         result += "]";
         return result;
     }
-    private error: ((type: string) => any) = (type) => {
+    private error(type: string): any {
         switch(type) {
             case 'remove':
                 console.error("Error! LinkedList.remove(): \n\t maybe list size=0");
@@ -221,13 +222,13 @@ export class Node<T> {
         this._data = data;
     }
 
-    get data() {
+    get data(): T {
         return this._data;
     }
-    get next() {
+    get next(): Node<T> {
         return this._next;
     }
-    get prev() {
+    get prev(): Node<T> {
         return this._prev;
     }
     set data(data: T) {
@@ -239,17 +240,12 @@ export class Node<T> {
     set prev(prev: Node<T>) {
         this._prev = prev;
     }
-    public toString() {
+    public toString(): string {
         return this._data.toString();
-    }
-    public clone() {
-        let cloneObject = [this._data].slice(0)[0];
-        
-        return cloneObject;
     }
 }
 
-class ListIterator<T> {
+class ListIterator<T> implements Iterator<T> {
     private _currentNode: Node<T>;
     private _lastData: T;
     private _lastIndex: number;

@@ -146,7 +146,7 @@ export default class LinkedList<T> implements Iterable<T> {
 
         return index;
     }
-    getIterator(): ListIterator<T> {
+    getIterator(): Iterator<T> {
         return new ListIterator(this, this._first);
     }
     toString(): string {
