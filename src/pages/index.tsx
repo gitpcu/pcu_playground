@@ -1,0 +1,1 @@
+export const Nemox2 = import('./Nemox2');

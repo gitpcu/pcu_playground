@@ -1,0 +1,16 @@
+@import '../../styles/utils.scss';
+
+.NemoBlock {
+    flex: 1 0 2rem;
+    height: 2rem;
+    border: 1px solid $oc-gray-9;
+}
+
+.blocked {
+    background-color: $oc-violet-4;
+}
+.empty {
+    background-image: url('../../static/xxx.png'); 
+    background-size: 2rem;
+    //background-image: url('https://image.freepik.com/free-icon/letter-x_318-26692.jpg'); 
+}
