@@ -14,9 +14,9 @@ class App extends Component {
     
     return (
       <div className="App">
-        <Nemox2 />
-        {/* <Route path="/" component={Nemox2} />
-        <Route path="/nemox2" component={Nemox2} /> */}
+        {/* <Nemox2 /> */}
+        <Route exact path="/" component={Nemox2} />
+        <Route path="/nemox2" component={Nemox2} />
       </div>
     );
   }

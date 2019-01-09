@@ -27,7 +27,7 @@ const convertLogic = (logic: number[][]) => {
                     const newValue: any = Number.parseInt(lastCharI)+1;
                     indexI[i] = indexI[i].slice(0, indexI[i].length-1) + newValue;
                 }
-                if(lastCharI == "0") {
+                if(lastCharJ == "0") {
                     indexJ[j] = "1";
                 } else if(lastCharJ == " ") {
                     indexJ[j] += "1";
@@ -92,8 +92,6 @@ class NemoBoard extends Component<NemoBoardProps, NemoBoardState> {
     }
     constructor(props: NemoBoardProps) {
         super(props);
-
-        
     }
     
     componentDidMount() {
