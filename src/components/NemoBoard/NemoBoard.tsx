@@ -79,15 +79,34 @@ const CountBlock = (prop: {value: string}) => {
     )
 }
 
-const NemoBoard = (prop: {logicData: number[][]}) => {
-    const { logicData } = prop;
-    const { indexI, indexJ } = convertLogic(logicData);
+interface NemoBoardProps {
+    logicData: any[][]
+}
+interface NemoBoardState {
+    board: any[][]
+}
 
-    const submitDataListener = () => {
+class NemoBoard extends Component<NemoBoardProps, NemoBoardState> {
+    state: NemoBoardState = {
+        board: null
+    }
+    constructor(props: NemoBoardProps) {
+        super(props);
+
+        
+    }
+    
+    componentDidMount() {
+        this.setState({
+            board: makeBoard(this.props.logicData)
+        })
+    }
+
+    submitDataListener = () => {
         for(let i=0; i<16; i++) {
             for(let j=0; j<16; j++) {
                 const userBlock = document.getElementsByClassName('NemoBlock')[16*i+j];
-                const answerBlock = logicData[i][j];
+                const answerBlock = this.props.logicData[i][j];
 
                 if(answerBlock == 1) {
                     if(!userBlock.classList.contains('blocked')) {
@@ -105,31 +124,49 @@ const NemoBoard = (prop: {logicData: number[][]}) => {
 
         alert("맞추셨네요! 축하드립니다.");
     }
-    
-    return(
-        <div className="NemoBoard">
-            <div className="NemoBoard_wrapper">
-                <div className="NemoBoard_indexJ">
-                    {
-                        indexJ.map((value, key) => {
-                            return <CountBlock value={value} key={key} />;
-                        })
-                    }
+    refreshDataListener = () => {
+        const blocked = document.getElementsByClassName('blocked');
+        const empty = document.getElementsByClassName('empty');
+
+        for(let i=0; i<16; i++) {
+            for(let j=0; j<16; j++) {
+                document.getElementsByClassName('NemoBlock')[16*i+j].classList.remove('blocked');
+                document.getElementsByClassName('NemoBlock')[16*i+j].classList.remove('empty');
+            }
+        }
+    }
+    render() {
+        const { logicData } = this.props;
+        const { indexI, indexJ } = convertLogic(logicData);
+        const { refreshDataListener, submitDataListener } = this;
+        let board = makeBoard(logicData);
+
+        return(
+            <div className="NemoBoard">
+                <div className="NemoBoard_wrapper">
+                    <div className="NemoBoard_indexJ">
+                        {
+                            indexJ.map((value, key) => {
+                                return <CountBlock value={value} key={key} />;
+                            })
+                        }
+                    </div>
+                    <div className="NemoBoard_indexI">
+                        {
+                            indexI.map((value, key) => {
+                                return <CountBlock value={value} key={key} />;
+                            })
+                        }
+                    </div>
+                    <div className="NemoBoard_board">
+                        {this.state.board}
+                    </div>
                 </div>
-                <div className="NemoBoard_indexI">
-                    {
-                        indexI.map((value, key) => {
-                            return <CountBlock value={value} key={key} />;
-                        })
-                    }
-                </div>
-                <div className="NemoBoard_board">
-                    {makeBoard(logicData)}
-                </div>
+                <NemoButtons refreshDataListener={refreshDataListener} submitDataListener={submitDataListener} />
             </div>
-            <NemoButtons submitDataListener={submitDataListener} />
-        </div>
-    )
+        )
+    }
+    
 }
 
 
