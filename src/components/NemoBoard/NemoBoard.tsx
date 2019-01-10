@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import NemoBlock from '../NemoBlock/NemoBlock';
 import './NemoBoard.scss';
 import NemoButtons from '../NemoButtons/NemoButtons';
+import DoubleLinkedList from '../../lib/DoubleLinkedList';
+import $ from 'jquery';
 
 const convertLogic = (logic: number[][]) => {
     let indexI = [];
@@ -12,6 +14,8 @@ const convertLogic = (logic: number[][]) => {
         indexJ[i] = "0";
     }
 
+    let overI = 0;
+    let overJ = 0;
     for(let i=0; i<logic.length; i++) {
         for(let j=0; j<logic[i].length; j++) {
             const check = logic[i][j];
@@ -20,20 +24,36 @@ const convertLogic = (logic: number[][]) => {
 
             if(check == 1) {
                 if(lastCharI == "0") {
-                    indexI[i] = "1";
+                    if(!indexI[i][indexI[i].length-2]) {
+                        indexI[i] = "1";
+                    } else {
+                        indexI[i] = overI+"";
+                    }
                 } else if(lastCharI == " ") {
                     indexI[i] += "1";
                 } else {
                     const newValue: any = Number.parseInt(lastCharI)+1;
                     indexI[i] = indexI[i].slice(0, indexI[i].length-1) + newValue;
+                    
+                    if(newValue % 10 == 0) {
+                        overI = newValue + 1;
+                    }
                 }
                 if(lastCharJ == "0") {
-                    indexJ[j] = "1";
+                    if(!indexJ[j][indexJ[j].length-2]) {
+                        indexJ[j] = "1";
+                    } else {
+                        indexJ[j] = overJ + "";
+                    }
                 } else if(lastCharJ == " ") {
                     indexJ[j] += "1";
                 } else {
                     const newValue: any = Number.parseInt(lastCharJ)+1;
                     indexJ[j] = indexJ[j].slice(0, indexJ[j].length-1) + newValue;
+
+                    if(newValue % 10 == 0) {
+                        overJ = newValue + 1;
+                    }
                 }
             } else {
                 if(lastCharI == "0" || lastCharI == " ") {
@@ -45,6 +65,13 @@ const convertLogic = (logic: number[][]) => {
                     indexJ[j] += " ";
                 }
             }
+
+            if(i == logic.length-1 && indexJ[j].lastIndexOf(" ") == indexJ[j].length-1) {
+                indexJ[j] = indexJ[j].slice(0, indexJ[j].length-1);
+            }
+        }
+        if(indexI[i].lastIndexOf(" ") == indexI[i].length-1) {
+            indexI[i] = indexI[i].slice(0, indexI[i].length-1);
         }
     }
     console.log({indexI, indexJ});
@@ -80,32 +107,35 @@ const CountBlock = (prop: {value: string}) => {
 }
 
 interface NemoBoardProps {
-    logicData: any[][]
-}
-interface NemoBoardState {
-    board: any[][]
+    logic: number[][];
+    callBackClear: Function;
 }
 
-class NemoBoard extends Component<NemoBoardProps, NemoBoardState> {
-    state: NemoBoardState = {
-        board: null
-    }
+class NemoBoard extends Component<NemoBoardProps> {
+
     constructor(props: NemoBoardProps) {
         super(props);
     }
-    
+
+    componentWillReceiveProps(nextProps: NemoBoardProps) {
+        if(nextProps.logic) {
+            console.log('프롭리시버');
+            $('.blocked').css('backgroundColor', '');
+            $('.NemoBlock').removeClass('blocked').removeClass('empty');
+        }
+    }
     componentDidMount() {
-        this.setState({
-            board: makeBoard(this.props.logicData)
-        })
+        $('.NemoBoard_board').css('width', `${this.props.logic.length*2}rem`);
     }
 
     submitDataListener = () => {
-        for(let i=0; i<16; i++) {
-            for(let j=0; j<16; j++) {
-                const userBlock = document.getElementsByClassName('NemoBlock')[16*i+j];
-                const answerBlock = this.props.logicData[i][j];
-
+        const logic = this.props.logic;
+        
+        for(let i=0; i<logic.length; i++) {
+            for(let j=0; j<logic.length; j++) {
+                const userBlock = document.getElementsByClassName('NemoBlock')[logic.length*i+j];
+                const answerBlock = logic[i][j];
+                
                 if(answerBlock == 1) {
                     if(!userBlock.classList.contains('blocked')) {
                         alert("틀려버렸네요~~");
@@ -120,24 +150,35 @@ class NemoBoard extends Component<NemoBoardProps, NemoBoardState> {
             }
         }
 
-        alert("맞추셨네요! 축하드립니다.");
+        let blockedCount = 0;
+        const waitAnim = (element: JQuery<HTMLElement>) => {
+            return new Promise((resolve, reject) => {
+                element.css('backgroundColor', "#a9e34b");
+                setTimeout(() => {
+                    if(blockedCount < $('.blocked').length) {
+                        resolve(waitAnim($('.blocked').eq(++blockedCount)));
+                    } else {
+                        resolve(true);
+                    }
+                }, 40);
+            })
+        }
+        
+        waitAnim($('.blocked').eq(0)).then(() => this.props.callBackClear());
     }
     refreshDataListener = () => {
-        const blocked = document.getElementsByClassName('blocked');
-        const empty = document.getElementsByClassName('empty');
-
         for(let i=0; i<16; i++) {
             for(let j=0; j<16; j++) {
-                document.getElementsByClassName('NemoBlock')[16*i+j].classList.remove('blocked');
-                document.getElementsByClassName('NemoBlock')[16*i+j].classList.remove('empty');
+                $('.NemoBlock').removeClass('blocked');
+                $('.NemoBlock').removeClass('empty');
             }
         }
     }
     render() {
-        const { logicData } = this.props;
-        const { indexI, indexJ } = convertLogic(logicData);
+        const { logic } = this.props;
+        const { indexI, indexJ } = convertLogic(logic);
         const { refreshDataListener, submitDataListener } = this;
-        let board = makeBoard(logicData);
+        let board = makeBoard(logic);
 
         return(
             <div className="NemoBoard">
@@ -157,7 +198,7 @@ class NemoBoard extends Component<NemoBoardProps, NemoBoardState> {
                         }
                     </div>
                     <div className="NemoBoard_board">
-                        {this.state.board}
+                        {board}
                     </div>
                 </div>
                 <NemoButtons refreshDataListener={refreshDataListener} submitDataListener={submitDataListener} />

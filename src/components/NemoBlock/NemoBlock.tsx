@@ -3,7 +3,24 @@ import './NemoBlock.scss';
 
 const blockClickListener = (e: any) => {
     e.preventDefault();
-    
+    console.log(e.button);
+
+    if(e.button == 0) {
+        if(e.target.classList.contains('empty')) {
+            return;
+        }
+        e.target.classList.toggle('blocked');
+        
+    } else if(e.button == 2) {
+        if(e.target.classList.contains('blocked')) {
+            return;
+        }
+        e.target.classList.toggle('empty');
+    }
+}
+const blockDragListener = (e: any) => {
+    e.preventDefault();
+    console.log(e.button);
     if(e.button == 0) {
         if(e.target.classList.contains('empty')) {
             return;
@@ -22,7 +39,7 @@ const blockClickListener = (e: any) => {
 
 const NemoBlock = () => {
     return(
-        <div onContextMenu={(e) => {e.preventDefault();}} onMouseDown={blockClickListener} className="NemoBlock">
+        <div onDragEnter={blockDragListener} onContextMenu={(e) => {e.preventDefault();}} onMouseUp={blockClickListener} className="NemoBlock" draggable>
             
         </div>
     )
