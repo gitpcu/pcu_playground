@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import NemoBlock from '../NemoBlock/NemoBlock';
 import './NemoBoard.scss';
 import NemoButtons from '../NemoButtons/NemoButtons';
-import DoubleLinkedList from '../../lib/DoubleLinkedList';
 import $ from 'jquery';
 
 const convertLogic = (logic: number[][]) => {
@@ -119,7 +118,6 @@ class NemoBoard extends Component<NemoBoardProps> {
 
     componentWillReceiveProps(nextProps: NemoBoardProps) {
         if(nextProps.logic) {
-            console.log('프롭리시버');
             $('.blocked').css('backgroundColor', '');
             $('.NemoBlock').removeClass('blocked').removeClass('empty');
             $('.NemoBoard_board').css('width', `${nextProps.logic.length*2}rem`);

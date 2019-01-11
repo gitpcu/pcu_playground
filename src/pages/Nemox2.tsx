@@ -20,7 +20,7 @@ class Nemox2 extends Component {
 
     callBackClear: () => void = () => {
         const nextNum = this.state.stageNum +1;
-        console.log(nextNum);
+        
         if(nextNum < logics.length) {
             alert("맞추셨네요. 다음 스테이지로 넘어갑니다-");
             this.setState({
@@ -30,8 +30,6 @@ class Nemox2 extends Component {
         } else {
             alert("축하합니다! 스테이지를 모두 클리어하셨습니다.");
         }
-        console.log("클리어바인딩");
-        console.log(this.state);
     }
 
     render() {
