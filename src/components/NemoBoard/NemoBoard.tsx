@@ -122,6 +122,7 @@ class NemoBoard extends Component<NemoBoardProps> {
             console.log('프롭리시버');
             $('.blocked').css('backgroundColor', '');
             $('.NemoBlock').removeClass('blocked').removeClass('empty');
+            $('.NemoBoard_board').css('width', `${nextProps.logic.length*2}rem`);
         }
     }
     componentDidMount() {
