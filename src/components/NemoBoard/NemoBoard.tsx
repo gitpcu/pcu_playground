@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import NemoBlock from '../NemoBlock/NemoBlock';
 import './NemoBoard.scss';
 import NemoButtons from '../NemoButtons/NemoButtons';
-import $ from 'jquery';
 
 const convertLogic = (logic: number[][]) => {
     let indexI = [];
@@ -118,13 +117,14 @@ class NemoBoard extends Component<NemoBoardProps> {
 
     componentWillReceiveProps(nextProps: NemoBoardProps) {
         if(nextProps.logic) {
-            $('.blocked').css('backgroundColor', '');
-            $('.NemoBlock').removeClass('blocked').removeClass('empty');
-            $('.NemoBoard_board').css('width', `${nextProps.logic.length*2}rem`);
+            this.refreshDataListener();
+            const board = document.getElementsByClassName('NemoBoard_board')[0] as HTMLElement;
+            board.style.width = `${nextProps.logic.length*2}rem`;
         }
     }
     componentDidMount() {
-        $('.NemoBoard_board').css('width', `${this.props.logic.length*2}rem`);
+        const board = document.getElementsByClassName('NemoBoard_board')[0] as HTMLElement;
+        board.style.width = `${this.props.logic.length*2}rem`;
     }
 
     submitDataListener = () => {
@@ -150,27 +150,35 @@ class NemoBoard extends Component<NemoBoardProps> {
         }
 
         let blockedCount = 0;
-        const waitAnim = (element: JQuery<HTMLElement>) => {
+        const waitAnim = (element: HTMLElement) => {
             return new Promise((resolve, reject) => {
-                element.css('backgroundColor', "#a9e34b");
-                setTimeout(() => {
-                    if(blockedCount < $('.blocked').length) {
-                        resolve(waitAnim($('.blocked').eq(++blockedCount)));
-                    } else {
+                const blocked = document.querySelectorAll('.blocked');
+                if(blockedCount < blocked.length) {
+                    element.style.backgroundColor = "#a9e34b";
+                    setTimeout(() => {
+                        resolve(waitAnim(blocked[++blockedCount] as HTMLElement));
+                    }, 40);
+                } else {
+                    setTimeout(() => {
                         resolve(true);
-                    }
-                }, 40);
+                    }, 150)
+                }
             })
         }
         
-        waitAnim($('.blocked').eq(0)).then(() => this.props.callBackClear());
+        waitAnim(document.querySelectorAll('.blocked')[0] as HTMLElement).then(() => this.props.callBackClear());
     }
     refreshDataListener = () => {
-        for(let i=0; i<16; i++) {
-            for(let j=0; j<16; j++) {
-                $('.NemoBlock').removeClass('blocked');
-                $('.NemoBlock').removeClass('empty');
+        const blockArr = document.getElementsByClassName('NemoBlock') as HTMLCollectionOf<HTMLElement>;
+
+        for(let i=0; i<blockArr.length; i++) {
+            if(blockArr[i].classList.contains('blocked')) {
+                blockArr[i].style.backgroundColor = "";
+                blockArr[i].classList.remove('blocked');
+            } else if(blockArr[i].classList.contains('empty')) {
+                blockArr[i].classList.remove('empty');
             }
+            
         }
     }
     render() {
