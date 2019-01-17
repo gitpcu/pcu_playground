@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import NemoBlock from '../NemoBlock/NemoBlock';
 import './NemoBoard.scss';
 import NemoButtons from '../NemoButtons/NemoButtons';
+import update from 'react-addons-update';
+import NemoItem from '../NemoItem/NemoItem';
 
 const convertLogic = (logic: number[][]) => {
     let indexI = [];
@@ -76,21 +78,6 @@ const convertLogic = (logic: number[][]) => {
     return {indexI, indexJ};
 }
 
-const makeBoard = (logic: number[][]) => {
-    const size = logic.length;
-    let board: any[] = [];
-    
-    for(let i=0; i<size; i++) {
-        board[i] = [];
-    }
-    for(let i=0; i<size; i++) {
-        for(let j=0; j<size; j++) {
-            board[i][j] = <NemoBlock key={`${i},${j}`} />
-        }
-    }
-
-    return board;
-}
 
 const CountBlock = (prop: {value: string}) => {
     return (
@@ -104,57 +91,56 @@ const CountBlock = (prop: {value: string}) => {
     )
 }
 
-interface NemoBoardProps {
-    logic: number[][];
-    callBackClear: Function;
+
+const itemActions = (type: string) => {
+    
 }
 
-class NemoBoard extends Component<NemoBoardProps> {
+const horizontalItemAction = () => {
 
-    constructor(props: NemoBoardProps) {
-        super(props);
+}
+
+interface NemoBoardProps {
+    stage: {name: string, logic: number[][]};
+    callBackClear: Function;
+}
+interface NemoBoardState {
+    resetCount: number;
+    currentLogic: number[][];
+    reset: boolean;
+}
+class NemoBoard extends Component<NemoBoardProps> {
+    state: NemoBoardState = {
+        resetCount: 0,
+        currentLogic: this.props.stage.logic,
+        reset: false
     }
+    currentLogic: number[][] = this.props.stage.logic;
+    convertValue: { indexI: string[], indexJ: string[] } = convertLogic(this.props.stage.logic);
+    blockCount: number = 0;
+    currentCount: number = 0;
+    board: any = React.createRef();
+    items: any = React.createRef();
 
     componentWillReceiveProps(nextProps: NemoBoardProps) {
-        if(nextProps.logic) {
+        if(nextProps.stage.logic) {
             this.refreshDataListener();
-            const board = document.getElementsByClassName('NemoBoard_board')[0] as HTMLElement;
-            board.style.width = `${nextProps.logic.length*2}rem`;
+            this.board.current.style.width = `${nextProps.stage.logic.length*2}rem`;
+            this.currentLogic = nextProps.stage.logic;
+            this.convertValue = convertLogic(nextProps.stage.logic);
         }
     }
     componentDidMount() {
-        const board = document.getElementsByClassName('NemoBoard_board')[0] as HTMLElement;
-        board.style.width = `${this.props.logic.length*2}rem`;
+        this.board.current.style.width = `${this.props.stage.logic.length*2}rem`;
     }
 
     submitDataListener = () => {
-        const logic = this.props.logic;
-        
-        for(let i=0; i<logic.length; i++) {
-            for(let j=0; j<logic.length; j++) {
-                const userBlock = document.getElementsByClassName('NemoBlock')[logic.length*i+j];
-                const answerBlock = logic[i][j];
-                
-                if(answerBlock == 1) {
-                    if(!userBlock.classList.contains('blocked')) {
-                        alert("틀려버렸네요~~");
-                        return;
-                    }
-                } else {
-                    if(userBlock.classList.contains('blocked')) {
-                        alert("틀려버렸네요~~");
-                        return;
-                    }
-                }
-            }
-        }
-
         let blockedCount = 0;
+        const blocked = document.querySelectorAll('.blocked');
         const waitAnim = (element: HTMLElement) => {
             return new Promise((resolve, reject) => {
-                const blocked = document.querySelectorAll('.blocked');
                 if(blockedCount < blocked.length) {
-                    element.style.backgroundColor = "#a9e34b";
+                    element.style.backgroundColor = "#40c057";
                     setTimeout(() => {
                         resolve(waitAnim(blocked[++blockedCount] as HTMLElement));
                     }, 40);
@@ -169,43 +155,114 @@ class NemoBoard extends Component<NemoBoardProps> {
         waitAnim(document.querySelectorAll('.blocked')[0] as HTMLElement).then(() => this.props.callBackClear());
     }
     refreshDataListener = () => {
-        const blockArr = document.getElementsByClassName('NemoBlock') as HTMLCollectionOf<HTMLElement>;
-
-        for(let i=0; i<blockArr.length; i++) {
-            if(blockArr[i].classList.contains('blocked')) {
-                blockArr[i].style.backgroundColor = "";
-                blockArr[i].classList.remove('blocked');
-            } else if(blockArr[i].classList.contains('empty')) {
-                blockArr[i].classList.remove('empty');
+        this.currentCount = this.blockCount;
+        this.setState({
+            reset: !this.state.reset            
+        })
+    }
+    checkBoard = (i: number, j: number) => {
+        this.currentLogic = update(
+            this.currentLogic,
+            {
+                [i]: {[j]: {$set: this.currentLogic[i][j] == 1 
+                    ? (() => {
+                        this.blockCount--;
+                        return 0;
+                    })()
+                    : (() => {
+                        this.blockCount++;
+                        return 1;
+                    })()}
+                }
             }
-            
+        )
+
+        if(this.blockCount == 0) {
+            this.submitDataListener();
+        }
+        console.log(this.blockCount);
+    }
+    itemActions = (type: string, target: HTMLElement): void => {
+        const size = this.currentLogic.length;
+        const blockList = this.board.current.childNodes;
+        const boardLength = this.board.current.childNodes.length;
+        let targetIndex;
+        for(let i=0; i<boardLength; i++) {
+            if(blockList[i] == target) {
+                targetIndex = i;
+                break;
+            }
+        }
+
+        switch(type) {
+            case "checkHorizontal":
+                let leftIndex = targetIndex - 1;
+                let rightIndex = targetIndex + 1;
+                if(leftIndex % size != 4 && this.currentLogic[Math.floor(leftIndex/size)][leftIndex%size] == 1) {
+                    alert("틀렸습니다. 수정하세요 :(");
+                    return;
+                }
+                if(rightIndex % size != 0 && this.currentLogic[Math.floor(rightIndex/size)][rightIndex%size] == 1) {
+                    alert("틀렸습니다. 수정하세요 :(");
+                    return;
+                }
+                
+                alert("맞습니다. 계속 진행하세요 :>");
+                return;
+            case "checkVertical":
+                let aboveIndex = targetIndex - size;
+                let underIndex = targetIndex + size;
+                if(aboveIndex > 0 && this.currentLogic[Math.floor(aboveIndex/size)][aboveIndex%size] == 1) {
+                    alert("틀렸습니다. 수정하세요 :(");
+                    return;
+                }
+                if(underIndex < boardLength && this.currentLogic[Math.floor(underIndex/size)][underIndex%size] == 1) {
+                    alert("틀렸습니다. 수정하세요 :(");
+                    return;
+                }
+
+                alert("맞습니다. 계속 진행하세요 :>");
+                return;
         }
     }
     render() {
-        const { logic } = this.props;
-        const { indexI, indexJ } = convertLogic(logic);
-        const { refreshDataListener, submitDataListener } = this;
-        let board = makeBoard(logic);
+        const { logic, name } = this.props.stage;
+        const { indexI, indexJ } = this.convertValue;
+        const { refreshDataListener, submitDataListener, itemActions } = this;
 
         return(
             <div className="NemoBoard">
+                <div className="NemoBoard_indexJ">
+                    {
+                        indexJ.map((value, key) => {
+                            return <CountBlock value={value} key={key} />;
+                        })
+                    }
+                </div>
+                <div className="NemoBoard_indexI">
+                    {
+                        indexI.map((value, key) => {
+                            return <CountBlock value={value} key={key} />;
+                        })
+                    }
+                </div>
                 <div className="NemoBoard_wrapper">
-                    <div className="NemoBoard_indexJ">
-                        {
-                            indexJ.map((value, key) => {
-                                return <CountBlock value={value} key={key} />;
+                    <div className="NemoBoard_board" ref={this.board} >
+                        {logic.map((valueI, i) => {
+                            return valueI.map((valueJ, j) => {
+                                if(logic[i][j] == 1)
+                                    this.blockCount++;
+                                
+                                return <NemoBlock checkBoard={this.checkBoard} reset={this.state.reset} key={`${name}${i}${j}`} i={i} j={j} />
                             })
-                        }
+                        })}
                     </div>
-                    <div className="NemoBoard_indexI">
-                        {
-                            indexI.map((value, key) => {
-                                return <CountBlock value={value} key={key} />;
-                            })
-                        }
-                    </div>
-                    <div className="NemoBoard_board">
-                        {board}
+                    <div className="NemoBoard_items" ref={this.items} >
+                        <span>아이템 목록</span>
+                        <NemoItem type="checkHorizontal" action={itemActions} />
+                        <NemoItem type="checkVertical" action={itemActions} />
+                        <NemoItem type="checkHorizontal" action={itemActions} />
+                        <NemoItem type="checkVertical" action={itemActions} />
                     </div>
                 </div>
                 <NemoButtons refreshDataListener={refreshDataListener} submitDataListener={submitDataListener} />
@@ -214,8 +271,6 @@ class NemoBoard extends Component<NemoBoardProps> {
     }
     
 }
-
-
 
 export default NemoBoard;
 

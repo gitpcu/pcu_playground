@@ -7,6 +7,7 @@
 }
 .NemoBoard_wrapper {
     position: relative;
+    display: flex;
 }
 .NemoBoard_indexI {
     position: absolute;
@@ -46,4 +47,25 @@
 .NemoBoard_board {
     display: flex;
     flex-wrap: wrap;
+}
+
+.NemoBoard_items {
+    width: 3rem;
+    height: 10rem;
+    position: absolute;
+    right: 0;
+    border: 1px solid black;
+    transform: translateX(calc(100% + 1rem));
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    span {
+        position: absolute;
+        width: 3rem;
+        left: 0;
+        transform: translateY(calc(-100% - 0.3rem));
+        z-index: 10;
+        font-size: 0.93rem;
+    }
 }

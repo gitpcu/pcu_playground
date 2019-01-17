@@ -3,12 +3,12 @@
 .NemoBlock {
     flex: 1 0 2rem;
     height: 2rem;
-    border: 1px solid $oc-gray-7;
+    border: 1px solid black;
     transition: all 0.25s ease;
 }
 
 .blocked {
-    background-color: $oc-gray-9;
+    background-color: $oc-violet-6;
 }
 .empty {
     background-image: url('../../static/xxx.png'); 

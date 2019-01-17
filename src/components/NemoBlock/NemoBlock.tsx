@@ -1,48 +1,79 @@
-import React, { MouseEvent } from 'react';
+import React, { MouseEvent, Component } from 'react';
 import './NemoBlock.scss';
 
-const blockClickListener = (e: any) => {
-    e.preventDefault();
-    console.log(e.button);
-
-    if(e.button == 0) {
-        if(e.target.classList.contains('empty')) {
-            return;
-        }
-        e.target.classList.toggle('blocked');
-        
-    } else if(e.button == 2) {
-        if(e.target.classList.contains('blocked')) {
-            return;
-        }
-        e.target.classList.toggle('empty');
-    }
+interface NemoBlockProps {
+    checkBoard: Function;
+    i: number;
+    j: number;
+    reset: boolean;
 }
-const blockDragListener = (e: any) => {
-    e.preventDefault();
-    console.log(e.button);
-    if(e.button == 0) {
-        if(e.target.classList.contains('empty')) {
-            return;
-        }
-        e.target.classList.toggle('blocked');
-        
-    } else if(e.button == 2) {
-        if(e.target.classList.contains('blocked')) {
-            return;
-        }
-        e.target.classList.toggle('empty');
-    }
+interface NemoBlockState {
+    type: string,
 }
+class NemoBlock extends Component<NemoBlockProps, NemoBlockState> {
+    state: NemoBlockState = {
+        type: ''
+    }
 
+    componentWillReceiveProps(nextProps: NemoBlockProps) {
+        if(this.props.reset != nextProps.reset) {
+            this.setState({
+                type: ''
+            })
+        }
+    }
+    blockChangeListener = (e: any) => {
+        e.preventDefault();
 
-
-const NemoBlock = () => {
-    return(
-        <div onDragEnter={blockDragListener} onContextMenu={(e) => {e.preventDefault();}} onMouseUp={blockClickListener} className="NemoBlock" draggable>
+        if(typeof document.onclick == "function") {
+            return;
+        }
             
-        </div>
-    )
+        let { type } = this.state;
+        const { checkBoard, i, j } = this.props;
+
+        if(e.button == 0) {
+            if(type == 'empty') {
+                return;
+            } else if(type == '') {
+                type = 'blocked';
+            } else {
+                type = '';
+            }
+
+            Promise.resolve((() => {
+                this.setState({
+                    type
+                })
+            })()).then(() => checkBoard(i, j));
+
+        } else if(e.button == 2) {
+            if(type == 'blocked') {
+                return;
+            } else if(type == '') {
+                type = 'empty';
+            } else {
+                type = '';
+            }
+            
+            this.setState({
+                type
+            })
+        }
+
+    }
+    render() {
+        const {blockChangeListener} = this;
+        return(
+            <div
+              onDragEnter={blockChangeListener} 
+              onContextMenu={(e) => {e.preventDefault();}} 
+              onMouseUp={blockChangeListener} 
+              className={`NemoBlock ${this.state.type}`} 
+              draggable
+            />
+        )
+    }
 }
 
 export default NemoBlock;
