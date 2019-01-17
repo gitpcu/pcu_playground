@@ -1,8 +1,10 @@
 @import '../../styles/utils.scss';
 
 .NemoItem {
+    position: relative;
     display: flex;
     justify-content: center;
+    align-items: center;
     padding: 0.5rem;
     margin: 0.3rem;
     background-color: $oc-indigo-6;
@@ -10,5 +12,12 @@
     &:focus {
         background-color: $oc-orange-6;
         outline: none;
+    }
+    div {
+        position: absolute;
+        top: 0;
+        left: 0;
+        font-size: 0.8rem;
+        font-weight: 700;
     }
 }

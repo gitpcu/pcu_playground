@@ -115,7 +115,7 @@ class NemoBoard extends Component<NemoBoardProps> {
         currentLogic: this.props.stage.logic,
         reset: false
     }
-    currentLogic: number[][] = this.props.stage.logic;
+    currentLogic: number[][];
     convertValue: { indexI: string[], indexJ: string[] } = convertLogic(this.props.stage.logic);
     blockCount: number = 0;
     currentCount: number = 0;
@@ -132,6 +132,8 @@ class NemoBoard extends Component<NemoBoardProps> {
     }
     componentDidMount() {
         this.board.current.style.width = `${this.props.stage.logic.length*2}rem`;
+        this.currentLogic = this.props.stage.logic;
+        this.currentCount = this.blockCount;
     }
 
     submitDataListener = () => {
@@ -155,9 +157,11 @@ class NemoBoard extends Component<NemoBoardProps> {
         waitAnim(document.querySelectorAll('.blocked')[0] as HTMLElement).then(() => this.props.callBackClear());
     }
     refreshDataListener = () => {
-        this.currentCount = this.blockCount;
+        this.currentLogic = this.props.stage.logic;
+        this.blockCount = 0;
+
         this.setState({
-            reset: !this.state.reset            
+            reset: !this.state.reset
         })
     }
     checkBoard = (i: number, j: number) => {
@@ -261,8 +265,8 @@ class NemoBoard extends Component<NemoBoardProps> {
                         <span>아이템 목록</span>
                         <NemoItem type="checkHorizontal" action={itemActions} />
                         <NemoItem type="checkVertical" action={itemActions} />
-                        <NemoItem type="checkHorizontal" action={itemActions} />
-                        <NemoItem type="checkVertical" action={itemActions} />
+                        <NemoItem type="burnHorizontal" action={itemActions} />
+                        <NemoItem type="burnVertical" action={itemActions} />
                     </div>
                 </div>
                 <NemoButtons refreshDataListener={refreshDataListener} submitDataListener={submitDataListener} />

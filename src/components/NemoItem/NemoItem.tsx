@@ -1,6 +1,7 @@
 import React from 'react'
 import './NemoItem.scss';
 import { FaArrowsAltH, FaArrowsAltV,  } from 'react-icons/fa';
+import { GoFlame } from "react-icons/go";
 
 interface NemoItemProps {
     type: string;
@@ -29,10 +30,42 @@ const NemoItem = (prop: NemoItemProps) => {
         }
     }
     
+    const icon = () => {
+        switch(prop.type) {
+            case 'checkHorizontal':
+                return(
+                    <FaArrowsAltH size={size} color={color} />
+                )
+            case 'checkVertical':
+                return(
+                    <FaArrowsAltV size={size} color={color} />
+                )
+            case 'burnHorizontal':
+                return(
+                    <>
+                    <div>가로</div>
+                    <GoFlame size={size} color={color} />
+                    </>
+                )
+            case 'burnVertical':
+                return(
+                    <>
+                    <div>세로</div>
+                    <GoFlame size={size} color={color} />
+                    </>
+                )
+        }
+    }
+    
     return(
         <div className="NemoItem" onClick={itemClick} tabIndex={-1}>
-            {type == 'checkHorizontal' && <FaArrowsAltH size={size} color={color} />}
+            {icon()}
+            {/* {type == 'checkHorizontal' && <FaArrowsAltH size={size} color={color} />}
             {type == 'checkVertical' && <FaArrowsAltV size={size} color={color} />}
+            {type == 'burnHorizontal' && <GoFlame size={size} color={color} />}
+            {type == 'burnHorizontal' && <span>가로</span>}
+            {type == 'burnVertical' && <GoFlame size={size} color={color} />}
+            {type == 'burnVertical' && <span>세로</span>} */}
         </div>
     )
 }
