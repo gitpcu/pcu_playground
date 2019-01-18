@@ -2,9 +2,7 @@ import React, { Component } from 'react';
 import NemoBlock from '../NemoBlock/NemoBlock';
 import './NemoBoard.scss';
 import NemoButtons from '../NemoButtons/NemoButtons';
-import update from 'react-addons-update';
 import NemoItem from '../NemoItem/NemoItem';
-import ArrayQueue from '../../lib/ArrayQueue';
 import LinkedQueue from '../../lib/LinkedQueue';
 import { deepCopyArray } from '../../lib/Utils';
 
