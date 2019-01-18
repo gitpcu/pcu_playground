@@ -20,8 +20,6 @@ const NemoItem = (prop: NemoItemProps) => {
         document.onclick = (e: any) => {  // *아이템 on상태 클릭*
             if(e.target.classList.contains('NemoBlock')) {
                 action(type, e.target);
-                
-                console.log("성공");
             }
             document.onclick = null;
             document.body.style.cursor = null;

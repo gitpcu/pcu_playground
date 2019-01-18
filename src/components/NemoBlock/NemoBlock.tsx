@@ -1,4 +1,4 @@
-import React, { MouseEvent, Component } from 'react';
+import React, { Component } from 'react';
 import './NemoBlock.scss';
 
 interface NemoBlockProps {
