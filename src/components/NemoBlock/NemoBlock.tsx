@@ -6,6 +6,7 @@ interface NemoBlockProps {
     i: number;
     j: number;
     reset: boolean;
+    burn?: number;
 }
 interface NemoBlockState {
     type: string,
@@ -21,14 +22,21 @@ class NemoBlock extends Component<NemoBlockProps, NemoBlockState> {
                 type: ''
             })
         }
+
+        if(typeof nextProps.burn == 'number') {
+            Promise.resolve((() => {
+                this.setState({
+                    type: nextProps.burn == 1 ? 'blocked' : ''
+                })
+            })()).then(() => nextProps.checkBoard(nextProps.i, nextProps.j, true));
+        }
     }
     blockChangeListener = (e: any) => {
         e.preventDefault();
-
         if(typeof document.onclick == "function") {
             return;
         }
-            
+        
         let { type } = this.state;
         const { checkBoard, i, j } = this.props;
 

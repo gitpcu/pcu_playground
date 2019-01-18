@@ -18,8 +18,6 @@ const NemoItem = (prop: NemoItemProps) => {
         document.body.style.cursor = "pointer";
         
         document.onclick = (e: any) => {  // *아이템 on상태 클릭*
-            e.preventDefault();
-            
             if(e.target.classList.contains('NemoBlock')) {
                 action(type, e.target);
                 
@@ -60,12 +58,6 @@ const NemoItem = (prop: NemoItemProps) => {
     return(
         <div className="NemoItem" onClick={itemClick} tabIndex={-1}>
             {icon()}
-            {/* {type == 'checkHorizontal' && <FaArrowsAltH size={size} color={color} />}
-            {type == 'checkVertical' && <FaArrowsAltV size={size} color={color} />}
-            {type == 'burnHorizontal' && <GoFlame size={size} color={color} />}
-            {type == 'burnHorizontal' && <span>가로</span>}
-            {type == 'burnVertical' && <GoFlame size={size} color={color} />}
-            {type == 'burnVertical' && <span>세로</span>} */}
         </div>
     )
 }

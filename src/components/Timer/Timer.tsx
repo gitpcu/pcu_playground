@@ -4,6 +4,7 @@ import './Timer.scss';
 interface TimerProps {
     startTime: number;
     deadLine: number;
+    timeOverListener: Function;
 }
 interface TimerState {
     leftTime: number;
@@ -17,9 +18,13 @@ class Timer extends Component<TimerProps, TimerState> {
     deadLine: number = this.props.deadLine;
 
     shouldComponentUpdate(nextProps: TimerProps, nextState: TimerState) {
+        if(nextProps.startTime == -1) {
+            return false;
+        }
         if(nextState.leftTime > this.deadLine) {
             clearInterval(this.timer);
             alert("저런.. 시간초과네요");
+            nextProps.timeOverListener();
             
             return false;
         }

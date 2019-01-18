@@ -1,21 +1,27 @@
 import React, { Component, Suspense, lazy } from 'react';
 import './Nemox2.scss';
 import { logics } from '../static/logics';
-// import NemoBoard from '../components/NemoBoard/NemoBoard';
-// import Timer from '../components/Timer/Timer'
+import { deepCopyArray } from '../lib/Utils';
 
 const NemoBoard = lazy(() => import('../components/NemoBoard/NemoBoard'));
 const Timer = lazy(() => import('../components/Timer/Timer'));
 
 interface Nemox2State {
     stageNum: number;
-    stage: { name: string, logic: number[][]};
+    stage: { 
+        name: string, 
+        length: number,
+        blockCount: number,
+        logic: number[][],
+    };
+    disable: boolean;
 }
 
 class Nemox2 extends Component<any, Nemox2State> {
     state: Nemox2State = {
         stageNum: 0,
         stage: logics[0],
+        disable: false
     }
 
     callBackClear: () => void = () => {
@@ -31,18 +37,23 @@ class Nemox2 extends Component<any, Nemox2State> {
             alert("축하합니다! 스테이지를 모두 클리어하셨습니다.");
         }
     }
-
+    timeOverListener: () => void = () => {
+        this.setState({
+            disable: true
+        })
+        
+    }
     render() {
         const { stageNum, stage } = this.state;
-        const { callBackClear } = this;
+        const { callBackClear, timeOverListener } = this;
 
         return(
             <div className="Nemox2_template">
                 <div className="Nemox2_section">
                     <Suspense fallback={<p>Now loading...</p>} >
-                        <Timer startTime={Date.now()} deadLine={stage.logic.length * 60} key={stage.name} />
+                        <Timer startTime={!this.state.disable ? Date.now() : -1} deadLine={stage.logic.length * 60} timeOverListener={timeOverListener} key={stage.name} />
                         <h3 className="Nemox2_title">{`스테이지 ${stageNum+1} : ${stage.name}`}</h3>
-                            <NemoBoard stage={stage} callBackClear={callBackClear} />
+                        <NemoBoard disable={this.state.disable} stage={stage} callBackClear={callBackClear} />
                     </Suspense>
                 </div>
             </div>

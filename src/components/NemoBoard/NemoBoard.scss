@@ -45,8 +45,16 @@
 }
 
 .NemoBoard_board {
+    position: relative;
     display: flex;
     flex-wrap: wrap;
+
+    .disabled {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
 }
 
 .NemoBoard_items {
