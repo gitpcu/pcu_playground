@@ -160,7 +160,7 @@ class NemoBoard extends Component<NemoBoardProps> {
             })
         }
         
-        waitAnim(document.querySelectorAll('.blocked')[0] as HTMLElement).then(() => this.props.callBackClear());
+        waitAnim(blocked[0] as HTMLElement).then(() => this.props.callBackClear());
     }
     refreshDataListener = () => {
         const { blockCount, logic } = this.props.stage;
