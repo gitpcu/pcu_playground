@@ -14,9 +14,15 @@ class Timer extends Component<TimerProps, TimerState> {
         leftTime: 0
     }
     timer: any;
-    startTime: number = this.props.startTime;
-    deadLine: number = this.props.deadLine;
+    startTime: number;
+    deadLine: number;
 
+    constructor(props: TimerProps) {
+        super(props);
+
+        this.startTime = props.startTime;
+        this.deadLine = props.deadLine;
+    }
     shouldComponentUpdate(nextProps: TimerProps, nextState: TimerState) {
         if(nextProps.startTime == -1) {
             return false;
@@ -42,7 +48,7 @@ class Timer extends Component<TimerProps, TimerState> {
     }
 
     render() {
-        const convertTime = this.props.deadLine - this.state.leftTime;
+        const convertTime = this.deadLine - this.state.leftTime;
 
         return(
             <div className="Nemox2_timer">

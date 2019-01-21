@@ -17,12 +17,13 @@ const convertLogic = (logic: number[][]) => {
 
     let overI = 0;
     let overJ = 0;
+
     for(let i=0; i<logic.length; i++) {
         for(let j=0; j<logic[i].length; j++) {
             const check = logic[i][j];
             const lastCharI = indexI[i][indexI[i].length-1];
             const lastCharJ = indexJ[j][indexJ[j].length-1];
-
+            
             if(check == 1) {
                 if(lastCharI == "0") {
                     if(!indexI[i][indexI[i].length-2]) {
@@ -57,13 +58,19 @@ const convertLogic = (logic: number[][]) => {
                     }
                 }
             } else {
-                if(lastCharI == "0" || lastCharI == " ") {
-                } else {
+                if(lastCharI != "0" && lastCharI != " ") {
                     indexI[i] += " ";
-                }
-                if(lastCharJ == "0" || lastCharJ == " ") {
                 } else {
+                    if(lastCharI == "0" && indexI[i][indexI[i].length-2]) {
+                        indexI[i] += " ";
+                    }
+                }
+                if(lastCharJ != "0" && lastCharJ != " ") {
                     indexJ[j] += " ";
+                } else {
+                    if(lastCharJ == "0" && indexJ[j][indexJ[j].length-2]) {
+                        indexJ[j] += " ";
+                    }
                 }
             }
 
@@ -111,13 +118,24 @@ class NemoBoard extends Component<NemoBoardProps> {
     }
     currentLogic: number[][];
     length: number;
-    blockCount: number = 0;
-    convertValue: { indexI: string[], indexJ: string[] } = convertLogic(this.props.stage.logic);
-    currentCount: number = 0;
-    board: any = React.createRef();
-    items: any = React.createRef();
+    blockCount: number;
+    convertValue: { indexI: string[], indexJ: string[] };
+    currentCount: number;
+    board: any;
     burn: LinkedQueue<number>;
 
+    constructor(props: NemoBoardProps) {
+        super(props);
+
+        const { length, blockCount, logic } = props.stage;
+        this.currentLogic = deepCopyArray(logic);
+        this.convertValue = convertLogic(logic);
+        this.length = length;
+        this.blockCount = blockCount;
+        this.currentCount = 0;
+        this.board = React.createRef();
+        this.burn = new LinkedQueue<number>();
+    }
     componentWillReceiveProps(nextProps: NemoBoardProps) {
         if(nextProps.stage) {
             const { length, blockCount, logic } = nextProps.stage; 
@@ -133,13 +151,7 @@ class NemoBoard extends Component<NemoBoardProps> {
         }
     }
     componentDidMount() {
-        const { length, blockCount, logic } = this.props.stage;
-        
         this.board.current.style.width = `${this.props.stage.length*2}rem`;
-        this.currentLogic = deepCopyArray(logic);
-        this.length = length;
-        this.blockCount = blockCount;
-        this.burn = new LinkedQueue<number>();
     }
     submitDataListener = () => {
         let blockedCount = 0;
@@ -295,7 +307,7 @@ class NemoBoard extends Component<NemoBoardProps> {
                             })
                         ))}
                     </div>
-                    <div className="NemoBoard_items" ref={this.items} >
+                    <div className="NemoBoard_items">
                         <span>아이템 목록</span>
                         <NemoItem type="checkHorizontal" action={itemActions} />
                         <NemoItem type="checkVertical" action={itemActions} />
