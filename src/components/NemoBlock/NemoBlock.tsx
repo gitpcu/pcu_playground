@@ -71,13 +71,15 @@ class NemoBlock extends Component<NemoBlockProps, NemoBlockState> {
 
     }
     render() {
-        const {blockChangeListener} = this;
+        const { blockChangeListener } = this;
+        const { type } = this.state;
+
         return(
             <div
               onDragEnter={blockChangeListener} 
               onContextMenu={(e) => {e.preventDefault();}} 
               onMouseUp={blockChangeListener} 
-              className={`NemoBlock ${this.state.type}`} 
+              className={`NemoBlock ${type}`} 
               draggable
             />
         )

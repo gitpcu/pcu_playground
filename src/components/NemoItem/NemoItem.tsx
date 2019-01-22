@@ -5,11 +5,11 @@ import { GoFlame } from "react-icons/go";
 
 interface NemoItemProps {
     type: string;
-    action: Function;
+    itemAction: Function;
 }
 
 const NemoItem = (prop: NemoItemProps) => {
-    const { type, action } = prop;
+    const { type, itemAction } = prop;
     const size = "1.1rem";
     const color = "white";
 
@@ -19,14 +19,14 @@ const NemoItem = (prop: NemoItemProps) => {
         
         document.onclick = (e: any) => {  // *아이템 on상태 클릭*
             if(e.target.classList.contains('NemoBlock')) {
-                action(type, e.target);
+                itemAction(type, e.target);
             }
             document.onclick = null;
             document.body.style.cursor = null;
         }
     }
     
-    const icon = () => {
+    const getIcon = () => {
         switch(prop.type) {
             case 'checkHorizontal':
                 return(
@@ -55,7 +55,7 @@ const NemoItem = (prop: NemoItemProps) => {
     
     return(
         <div className="NemoItem" onClick={itemClick} tabIndex={-1}>
-            {icon()}
+            {getIcon()}
         </div>
     )
 }

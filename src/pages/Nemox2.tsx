@@ -24,7 +24,7 @@ class Nemox2 extends Component<any, Nemox2State> {
         disable: false
     }
 
-    callBackClear: () => void = () => {
+    callNextStage: () => void = () => {
         const next = this.state.stageNum + 1;
         
         if(next < logics.length) {
@@ -41,11 +41,10 @@ class Nemox2 extends Component<any, Nemox2State> {
         this.setState({
             disable: true
         })
-        
     }
     render() {
         const { stageNum, stage, disable } = this.state;
-        const { callBackClear, timeOverListener } = this;
+        const { callNextStage, timeOverListener } = this;
 
         return(
             <div className="Nemox2_template">
@@ -53,7 +52,7 @@ class Nemox2 extends Component<any, Nemox2State> {
                     <Suspense fallback={<p>Now loading...</p>} >
                         <Timer startTime={!this.state.disable ? Date.now() : -1} deadLine={stage.logic.length * 60} timeOverListener={timeOverListener} key={stage.name} />
                         <h3 className="Nemox2_title">{`스테이지 ${stageNum+1} : ${stage.name}`}</h3>
-                        <NemoBoard disable={disable} stage={stage} callBackClear={callBackClear} />
+                        <NemoBoard disable={disable} stage={stage} callNextStage={callNextStage} />
                     </Suspense>
                 </div>
             </div>

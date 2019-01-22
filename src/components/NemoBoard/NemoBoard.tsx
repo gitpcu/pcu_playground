@@ -6,88 +6,9 @@ import NemoItem from '../NemoItem/NemoItem';
 import LinkedQueue from '../../lib/LinkedQueue';
 import { deepCopyArray } from '../../lib/Utils';
 
-const convertLogic = (logic: number[][]) => {
-    let indexI = [];
-    let indexJ = [];
-
-    for(let i=0; i<logic.length; i++) {
-        indexI[i] = "0";
-        indexJ[i] = "0";
-    }
-
-    let overI = 0;
-    let overJ = 0;
-
-    for(let i=0; i<logic.length; i++) {
-        for(let j=0; j<logic[i].length; j++) {
-            const check = logic[i][j];
-            const lastCharI = indexI[i][indexI[i].length-1];
-            const lastCharJ = indexJ[j][indexJ[j].length-1];
-            
-            if(check == 1) {
-                if(lastCharI == "0") {
-                    if(!indexI[i][indexI[i].length-2]) {
-                        indexI[i] = "1";
-                    } else {
-                        indexI[i] = overI+"";
-                    }
-                } else if(lastCharI == " ") {
-                    indexI[i] += "1";
-                } else {
-                    const newValue: any = Number.parseInt(lastCharI)+1;
-                    indexI[i] = indexI[i].slice(0, indexI[i].length-1) + newValue;
-                    
-                    if(newValue % 10 == 0) {
-                        overI = newValue + 1;
-                    }
-                }
-                if(lastCharJ == "0") {
-                    if(!indexJ[j][indexJ[j].length-2]) {
-                        indexJ[j] = "1";
-                    } else {
-                        indexJ[j] = overJ + "";
-                    }
-                } else if(lastCharJ == " ") {
-                    indexJ[j] += "1";
-                } else {
-                    const newValue: any = Number.parseInt(lastCharJ)+1;
-                    indexJ[j] = indexJ[j].slice(0, indexJ[j].length-1) + newValue;
-
-                    if(newValue % 10 == 0) {
-                        overJ = newValue + 1;
-                    }
-                }
-            } else {
-                if(lastCharI != "0" && lastCharI != " ") {
-                    indexI[i] += " ";
-                } else {
-                    if(lastCharI == "0" && indexI[i][indexI[i].length-2]) {
-                        indexI[i] += " ";
-                    }
-                }
-                if(lastCharJ != "0" && lastCharJ != " ") {
-                    indexJ[j] += " ";
-                } else {
-                    if(lastCharJ == "0" && indexJ[j][indexJ[j].length-2]) {
-                        indexJ[j] += " ";
-                    }
-                }
-            }
-
-            if(i == logic.length-1 && indexJ[j].lastIndexOf(" ") == indexJ[j].length-1) {
-                indexJ[j] = indexJ[j].slice(0, indexJ[j].length-1);
-            }
-        }
-        if(indexI[i].lastIndexOf(" ") == indexI[i].length-1) {
-            indexI[i] = indexI[i].slice(0, indexI[i].length-1);
-        }
-    }
-    return {indexI, indexJ};
-}
-
-const CountBlock = (prop: {value: string}) => {
+const HintBlock = (prop: {value: string}) => {
     return (
-        <div className="CountBlock">
+        <div className="HintBlock">
             {
                 prop.value.split(" ").map((value, key) => {
                     return <span key={key}>{value}</span>
@@ -101,10 +22,10 @@ interface NemoBoardProps {
     stage: {
         name: string, 
         length: number, 
-        blockCount: number, 
+        blockCount: number,
         logic: number[][]
     };
-    callBackClear: Function;
+    callNextStage: Function;
     disable: boolean;
 }
 interface NemoBoardState {
@@ -117,22 +38,20 @@ class NemoBoard extends Component<NemoBoardProps> {
         burn: new Array<number>(2)
     }
     currentLogic: number[][];
+    hint: { indexI: string[], indexJ: string[] };
     length: number;
     blockCount: number;
-    convertValue: { indexI: string[], indexJ: string[] };
-    currentCount: number;
-    board: any;
     burn: LinkedQueue<number>;
+    board: any;
 
     constructor(props: NemoBoardProps) {
         super(props);
 
         const { length, blockCount, logic } = props.stage;
         this.currentLogic = deepCopyArray(logic);
-        this.convertValue = convertLogic(logic);
+        this.hint = this.convertLogic(logic);
         this.length = length;
         this.blockCount = blockCount;
-        this.currentCount = 0;
         this.board = React.createRef();
         this.burn = new LinkedQueue<number>();
     }
@@ -140,20 +59,20 @@ class NemoBoard extends Component<NemoBoardProps> {
         if(nextProps.stage) {
             const { length, blockCount, logic } = nextProps.stage; 
             
-            this.board.current.style.width = `${nextProps.stage.length*2}rem`;
             this.length = length;
             this.blockCount = blockCount;
             this.currentLogic = deepCopyArray(logic);
-            this.convertValue = convertLogic(logic);
+            this.hint = this.convertLogic(logic);
+            this.board.current.style.width = `${length*2}rem`;
             this.setState({
                 burn: new Array<number>(2)
             })
         }
     }
     componentDidMount() {
-        this.board.current.style.width = `${this.props.stage.length*2}rem`;
+        this.board.current.style.width = `${this.length*2}rem`;
     }
-    submitDataListener = () => {
+    stageClearEffect = (): void => {
         let blockedCount = 0;
         const blocked = document.querySelectorAll('.blocked');
         
@@ -172,9 +91,9 @@ class NemoBoard extends Component<NemoBoardProps> {
             })
         }
         
-        waitAnim(blocked[0] as HTMLElement).then(() => this.props.callBackClear());
+        waitAnim(blocked[0] as HTMLElement).then(() => this.props.callNextStage());
     }
-    refreshDataListener = () => {
+    refreshBoard = (): void => {
         const { blockCount, logic } = this.props.stage;
 
         this.blockCount = blockCount;
@@ -183,7 +102,7 @@ class NemoBoard extends Component<NemoBoardProps> {
             reset: !this.state.reset
         })
     }
-    checkBoard = (i: number, j: number, burn?: boolean) => {
+    checkBoard = (i: number, j: number, burn?: boolean): void => {
         if(this.blockCount == 0) {
             return;
         }
@@ -203,11 +122,11 @@ class NemoBoard extends Component<NemoBoardProps> {
         }
 
         if(this.blockCount == 0) {
-            this.submitDataListener();
+            this.stageClearEffect();
         }
     }
-    itemActions = (type: string, target: HTMLElement): void => {
-        const size = this.currentLogic.length;
+    itemAction = (type: string, target: HTMLElement): void => {
+        const length = this.length;
         const blockList = this.board.current.childNodes;
         const boardLength = this.board.current.childNodes.length;
         let targetIndex;
@@ -222,11 +141,11 @@ class NemoBoard extends Component<NemoBoardProps> {
         if(type == "checkHorizontal") {
             let leftIndex = targetIndex - 1;
             let rightIndex = targetIndex + 1;
-            if(leftIndex % size != 4 && this.currentLogic[Math.floor(leftIndex/size)][leftIndex%size] == 1) {
+            if(leftIndex % length != 4 && this.currentLogic[Math.floor(leftIndex/length)][leftIndex%length] == 1) {
                 alert("틀렸습니다. 수정하세요 :(");
                 return;
             }
-            if(rightIndex % size != 0 && this.currentLogic[Math.floor(rightIndex/size)][rightIndex%size] == 1) {
+            if(rightIndex % length != 0 && this.currentLogic[Math.floor(rightIndex/length)][rightIndex%length] == 1) {
                 alert("틀렸습니다. 수정하세요 :(");
                 return;
             }
@@ -234,13 +153,13 @@ class NemoBoard extends Component<NemoBoardProps> {
             alert("맞습니다. 계속 진행하세요 :>");
             return;
         } else if(type == "checkVertical") {
-            let aboveIndex = targetIndex - size;
-                let underIndex = targetIndex + size;
-                if(aboveIndex > 0 && this.currentLogic[Math.floor(aboveIndex/size)][aboveIndex%size] == 1) {
+            let aboveIndex = targetIndex - length;
+                let underIndex = targetIndex + length;
+                if(aboveIndex > 0 && this.currentLogic[Math.floor(aboveIndex/length)][aboveIndex%length] == 1) {
                     alert("틀렸습니다. 수정하세요 :(");
                     return;
                 }
-                if(underIndex < boardLength && this.currentLogic[Math.floor(underIndex/size)][underIndex%size] == 1) {
+                if(underIndex < boardLength && this.currentLogic[Math.floor(underIndex/length)][underIndex%length] == 1) {
                     alert("틀렸습니다. 수정하세요 :(");
                     return;
                 }
@@ -248,7 +167,7 @@ class NemoBoard extends Component<NemoBoardProps> {
                 alert("맞습니다. 계속 진행하세요 :>");
                 return;
         } else if(type == "burnHorizontal") {
-            const burnIndexI = Math.floor(targetIndex/size);
+            const burnIndexI = Math.floor(targetIndex/length);
             this.props.stage.logic[burnIndexI].map((value, key) => {
                 this.burn.enqueue(value);
             });
@@ -259,7 +178,7 @@ class NemoBoard extends Component<NemoBoardProps> {
                 burn: [burnIndexI, null]
             })
         } else if(type == "burnVertical") {
-            const burnIndexJ = Math.floor(targetIndex%size);
+            const burnIndexJ = Math.floor(targetIndex%length);
             this.props.stage.logic.map((value, key) => {
                 this.burn.enqueue(value[burnIndexJ]); 
             });
@@ -271,10 +190,90 @@ class NemoBoard extends Component<NemoBoardProps> {
             })
         }
     }
+    
+    convertLogic = (logic: number[][]) => {
+        let indexI = [];
+        let indexJ = [];
+
+        for(let i=0; i<logic.length; i++) {
+            indexI[i] = "0";
+            indexJ[i] = "0";
+        }
+
+        let overI = 0;
+        let overJ = 0;
+
+        for(let i=0; i<logic.length; i++) {
+            for(let j=0; j<logic[i].length; j++) {
+                const check = logic[i][j];
+                const lastCharI = indexI[i][indexI[i].length-1];
+                const lastCharJ = indexJ[j][indexJ[j].length-1];
+                
+                if(check == 1) {
+                    if(lastCharI == "0") {
+                        if(!indexI[i][indexI[i].length-2]) {
+                            indexI[i] = "1";
+                        } else {
+                            indexI[i] = overI+"";
+                        }
+                    } else if(lastCharI == " ") {
+                        indexI[i] += "1";
+                    } else {
+                        const newValue: any = Number.parseInt(lastCharI)+1;
+                        indexI[i] = indexI[i].slice(0, indexI[i].length-1) + newValue;
+                        
+                        if(newValue % 10 == 0) {
+                            overI = newValue + 1;
+                        }
+                    }
+                    if(lastCharJ == "0") {
+                        if(!indexJ[j][indexJ[j].length-2]) {
+                            indexJ[j] = "1";
+                        } else {
+                            indexJ[j] = overJ + "";
+                        }
+                    } else if(lastCharJ == " ") {
+                        indexJ[j] += "1";
+                    } else {
+                        const newValue: any = Number.parseInt(lastCharJ)+1;
+                        indexJ[j] = indexJ[j].slice(0, indexJ[j].length-1) + newValue;
+
+                        if(newValue % 10 == 0) {
+                            overJ = newValue + 1;
+                        }
+                    }
+                } else {
+                    if(lastCharI != "0" && lastCharI != " ") {
+                        indexI[i] += " ";
+                    } else {
+                        if(lastCharI == "0" && indexI[i][indexI[i].length-2]) {
+                            indexI[i] += " ";
+                        }
+                    }
+                    if(lastCharJ != "0" && lastCharJ != " ") {
+                        indexJ[j] += " ";
+                    } else {
+                        if(lastCharJ == "0" && indexJ[j][indexJ[j].length-2]) {
+                            indexJ[j] += " ";
+                        }
+                    }
+                }
+
+                if(i == logic.length-1 && indexJ[j].lastIndexOf(" ") == indexJ[j].length-1) {
+                    indexJ[j] = indexJ[j].slice(0, indexJ[j].length-1);
+                }
+            }
+            if(indexI[i].lastIndexOf(" ") == indexI[i].length-1) {
+                indexI[i] = indexI[i].slice(0, indexI[i].length-1);
+            }
+        }
+        return {indexI, indexJ};
+    }
+
     render() {
         const { logic, name } = this.props.stage;
-        const { indexI, indexJ } = this.convertValue;
-        const { refreshDataListener, submitDataListener, itemActions } = this;
+        const { indexI, indexJ } = this.hint;
+        const { refreshBoard, stageClearEffect, itemAction } = this;
         const { burn } = this.state;
 
         return(
@@ -282,14 +281,14 @@ class NemoBoard extends Component<NemoBoardProps> {
                 <div className="NemoBoard_indexJ">
                     {
                         indexJ.map((value, key) => {
-                            return <CountBlock value={value} key={key} />;
+                            return <HintBlock value={value} key={key} />;
                         })
                     }
                 </div>
                 <div className="NemoBoard_indexI">
                     {
                         indexI.map((value, key) => {
-                            return <CountBlock value={value} key={key} />;
+                            return <HintBlock value={value} key={key} />;
                         })
                     }
                 </div>
@@ -309,13 +308,13 @@ class NemoBoard extends Component<NemoBoardProps> {
                     </div>
                     <div className="NemoBoard_items">
                         <span>아이템 목록</span>
-                        <NemoItem type="checkHorizontal" action={itemActions} />
-                        <NemoItem type="checkVertical" action={itemActions} />
-                        <NemoItem type="burnHorizontal" action={itemActions} />
-                        <NemoItem type="burnVertical" action={itemActions} />
+                        <NemoItem type="checkHorizontal" itemAction={itemAction} />
+                        <NemoItem type="checkVertical" itemAction={itemAction} />
+                        <NemoItem type="burnHorizontal" itemAction={itemAction} />
+                        <NemoItem type="burnVertical" itemAction={itemAction} />
                     </div>
                 </div>
-                <NemoButtons refreshDataListener={refreshDataListener} submitDataListener={submitDataListener} />
+                <NemoButtons refreshBoard={refreshBoard} stageClearEffect={stageClearEffect} />
             </div>
         )
     }
