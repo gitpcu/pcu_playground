@@ -21,7 +21,7 @@ class Nemox2 extends Component<any, Nemox2State> {
     state: Nemox2State = {
         stageNum: 0,
         stage: logics[0],
-        disable: false
+        disable: null
     }
 
     callNextStage: () => void = () => {
@@ -35,6 +35,9 @@ class Nemox2 extends Component<any, Nemox2State> {
             });
         } else {
             alert("축하합니다! 스테이지를 모두 클리어하셨습니다.");
+            this.setState({
+                disable: true
+            })
         }
     }
     timeOverListener: () => void = () => {

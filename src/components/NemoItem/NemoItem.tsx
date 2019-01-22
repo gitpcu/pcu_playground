@@ -20,7 +20,11 @@ const NemoItem = (prop: NemoItemProps) => {
         document.onclick = (e: any) => {  // *아이템 on상태 클릭*
             if(e.target.classList.contains('NemoBlock')) {
                 itemAction(type, e.target);
+            } else if(e.target.classList.contains('NemoItem_clickSpace')) {
+                e.target.click();
+                return;
             }
+
             document.onclick = null;
             document.body.style.cursor = null;
         }
@@ -55,6 +59,7 @@ const NemoItem = (prop: NemoItemProps) => {
     
     return(
         <div className="NemoItem" onClick={itemClick} tabIndex={-1}>
+            <div className="NemoItem_clickSpace" />
             {getIcon()}
         </div>
     )

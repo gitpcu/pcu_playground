@@ -99,7 +99,8 @@ class NemoBoard extends Component<NemoBoardProps> {
         this.blockCount = blockCount;
         this.currentLogic = deepCopyArray(logic);
         this.setState({
-            reset: !this.state.reset
+            reset: !this.state.reset,
+            burn: [null, null]
         })
     }
     checkBoard = (i: number, j: number, burn?: boolean): void => {
