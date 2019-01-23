@@ -3,6 +3,9 @@ export const logics = [
         name: "따봉",
         length: 5,
         blockCount: 11,
+        //logics: "00010,00010,01110,01110,01110",
+        //hintI: "1 1 3 3 3",
+        //hintJ: "0 3 3 5 0",
         logic: [
             [0,0,0,1,0],
             [0,0,0,1,0],
@@ -15,6 +18,9 @@ export const logics = [
         name: "쉼표",
         length: 5,
         blockCount: 8,
+        //logics: "0000001110011100001000100",
+        //hintI: "0 3 3 1 1",
+        //hintJ: "0 2 2,1 3 0",
         logic: [
             [0,0,0,0,0],
             [0,1,1,1,0],
@@ -27,6 +33,9 @@ export const logics = [
         name: "하트",
         length: 5,
         blockCount: 15,
+        //logics: "01010,11011,11111,01110,00100",
+        //hintI: "1,1 2,2 5 3 1",
+        //hintJ: "2 4 3 4 2",
         logic: [
             [0,1,0,1,0],
             [1,1,0,1,1],

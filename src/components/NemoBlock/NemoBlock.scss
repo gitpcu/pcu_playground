@@ -5,6 +5,19 @@
     height: 2rem;
     border: 1px solid black;
     transition: all 0.25s ease;
+
+    &.bold_i {
+        border-bottom-width: 2px;
+    }
+    &.bold_j {
+        border-right-width: 2px;
+    }
+    &.bold_i_first {
+        border-top-width: 2px;
+    }
+    &.bold_j_first {
+        border-left-width: 2px;
+    }
 }
 
 .blocked {

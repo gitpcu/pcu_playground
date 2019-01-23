@@ -13,6 +13,7 @@ interface Nemox2State {
         length: number,
         blockCount: number,
         logic: number[][],
+        //logics: string
     };
     disable: boolean;
 }
@@ -48,7 +49,18 @@ class Nemox2 extends Component<any, Nemox2State> {
     render() {
         const { stageNum, stage, disable } = this.state;
         const { callNextStage, timeOverListener } = this;
+        // const num = logics[2].logics.split(",")[1].split("0").join(" ").trim().split(" ");
+        // const num2 = logics[1].logics.split("");
+        // let hintI: any = [];
+        // let hintJ: any = [];
 
+        // for(let i=0; i<25; i++) {
+        //     if(num2[i] == "1") {
+        //         hintJ[25%i]
+        //     }
+        // }
+
+        //console.log(num2)
         return(
             <div className="Nemox2_template">
                 <div className="Nemox2_section">

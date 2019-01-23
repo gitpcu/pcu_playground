@@ -23,7 +23,8 @@ interface NemoBoardProps {
         name: string, 
         length: number, 
         blockCount: number,
-        logic: number[][]
+        logic: number[][],
+        //logics: string
     };
     callNextStage: Function;
     disable: boolean;
@@ -192,6 +193,30 @@ class NemoBoard extends Component<NemoBoardProps> {
         }
     }
     
+    getHint = (logic: string) => {
+        const rows = logic.split(",");
+        const size = rows.length;
+        let hint: {rows: string[], columns: string[]} = { rows: [], columns: [] };
+
+        for(let i=0; i<size; i++) {
+            let row = rows[i];
+            let column;
+            let convertRow = row.split("0").join(" ").trim().split(" ");
+
+            for(let j=0; j<size; j++) {
+                
+            }
+
+            if(row[i]) {
+                if(!hint.rows[i]) {
+                    hint.columns[i] = "1";
+                }
+            }
+
+            hint.rows[i]
+        }
+    }
+
     convertLogic = (logic: number[][]) => {
         let indexI = [];
         let indexJ = [];
