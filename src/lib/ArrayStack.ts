@@ -5,23 +5,32 @@ export default class ArrayStack<T> implements Iterable<T> {
     private _array: T[];
     private _top: number;
     private _size: number;
+    private _emptyIndex: number;
 
     constructor(size: number) {
         this._size = size;
         this._array = new Array<T>(size);
-        this._top = this._size;
+        this._top = size;
     }
 
     push(data: T) {
-        const emptyIndex = this.empty();
-
-        if(emptyIndex == -1) {
+        if(this._top <= 0) {
             this.error('push');
             return;
         }
 
-        this._array[emptyIndex] = data;
         this._top--;
+        this._array[this._top] = data;
+
+        // const emptyIndex = this.empty();
+        
+        // if(emptyIndex == -1) {
+        //     this.error('push');
+        //     return;
+        // }
+
+        // this._array[emptyIndex] = data;
+        // this._top--;
     }
     pop(): T {
         if(this._top==this._size) {
@@ -46,7 +55,7 @@ export default class ArrayStack<T> implements Iterable<T> {
     empty(): number {
         let emptyIndex = -1;
 
-        for(let i=this._array.length-1; i>=0; i--) {
+        for(let i=this._size-1; i>=0; i--) {
             if(!this._array[i]) {
                 emptyIndex = i;
                 return emptyIndex;
@@ -88,13 +97,10 @@ export default class ArrayStack<T> implements Iterable<T> {
 }
 
 class StackIterator<T> implements Iterator<T> {
-    private _currentStack: ArrayStack<T>;
     private _currentArray: T[];
     private _next: number;
-    private _lastData: T;
 
     constructor(stack: ArrayStack<T>, array: T[], first: number) {
-        this._currentStack = stack;
         this._currentArray = array;
         this._next = first;
     }

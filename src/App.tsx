@@ -6,11 +6,11 @@ import Nemox2 from './pages/Nemox2';
 
 class App extends Component {
   render() {
-    //linkedListTest();
-    //linkedStackTest();
-    //linkedQueueTest();
-    //doubleLinkedListTest();
-    //arrayStackTest();
+    // linkedListTest();
+    // linkedStackTest();
+    // linkedQueueTest();
+    // doubleLinkedListTest();
+    // arrayStackTest();
     
     return (
       <div className="App">
